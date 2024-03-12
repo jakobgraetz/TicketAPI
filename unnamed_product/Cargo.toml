@@ -5,3 +5,4 @@ edition = "2021"
 authors = ["Johannes Schießl","Jakob Grätz"]
 
 [dependencies]
+chrono = "0.4"
