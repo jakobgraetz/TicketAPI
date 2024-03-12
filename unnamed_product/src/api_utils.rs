@@ -10,6 +10,10 @@ pub fn check_api_key(api_key: String) -> bool {
     }
 }
 
+/*
+* @author Jakob Grätz
+* @description Generates a new API key (String).
+*/
 pub fn generate_api_key() -> String {
     let api_key = "My API key".to_string();
     return api_key;
