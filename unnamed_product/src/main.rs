@@ -9,7 +9,8 @@ mod db_handler;
 mod api_utils;
 
 fn main() {
-    api_utils::handle_api_utils_mod_test();
+    print!("Testing with 'correct' API key: {:?} \n", api_utils::check_api_key("abc123".to_string()));
+    print!("Testing with 'incorrect' API key: {:?} \n", api_utils::check_api_key("def456".to_string()));
     db_handler::handle_db_mod_test();
     println!("Hello, world!");
 }
