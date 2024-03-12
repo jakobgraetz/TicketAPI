@@ -1,5 +1,6 @@
 # How Blockchain works
-### via IBM - https://www.ibm.com/topics/blockchain
+
+## via IBM - <https://www.ibm.com/topics/blockchain>
 
 - Distributed ledger technology
     All network participants have access to the distributed ledger and its immutable record of transactions. With this shared ledger, transactions are recorded only once, eliminating the duplication of effort that’s typical of traditional business networks.
@@ -13,3 +14,7 @@
     These blocks form a chain of data as an asset moves from place to place or ownership changes hands. The blocks confirm the exact time and sequence of transactions, and the blocks link securely together to prevent any block from being altered or a block being inserted between two existing blocks.
 - Transactions are blocked together in an irreversible chain: a blockchain
     Each additional block strengthens the verification of the previous block and hence the entire blockchain. Rendering the blockchain tamper-evident, delivering the key strength of immutability. Removing the possibility of tampering by a malicious actor, and builds a ledger of transactions you and other network members can trust.
+
+## Our Tech Stack
+
+We will utilize Rust, Parity Substrate and more technologies!
