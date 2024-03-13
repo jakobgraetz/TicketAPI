@@ -26,6 +26,9 @@ pub fn check_api_key(api_key: String) -> bool {
 * @author Jakob Grätz
 * @description Generates a new API key (String).
 */
+// to avoid giving out the same API key more than once, API keys will 
+// need to be stored and the API key generator needs to check if a key 
+// already exists before returning it.
 pub fn generate_api_key() -> String {
     let mut rng = rand::thread_rng();
 
