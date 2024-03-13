@@ -29,7 +29,7 @@ pub fn check_api_key(api_key: String) -> bool {
 pub fn generate_api_key() -> String {
     let mut rng = rand::thread_rng();
 
-    let charset: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.!+-#";
+    let charset: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.!+-#![]|{}?*'^<>()/&%$";
     let mut key = String::with_capacity(KEY_LENGTH);
 
     let mut unique_chars = HashSet::with_capacity(KEY_LENGTH);
