@@ -11,6 +11,7 @@ mod api_utils;
 fn main() {
     print!("Testing with 'correct' API key: {:?} \n", api_utils::check_api_key("abc123".to_string()));
     print!("Testing with 'incorrect' API key: {:?} \n", api_utils::check_api_key("def456".to_string()));
+    print!("Testing generate_api_key: {:?}", api_utils::generate_api_key());
     db_handler::handle_db_mod_test();
     println!("Hello, world!");
 }
