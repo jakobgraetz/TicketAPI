@@ -8,7 +8,7 @@
 use rand::Rng;
 use std::collections::HashSet;
 
-const KEY_LENGTH: usize = 32;
+const KEY_LENGTH: usize = 64;
 
 /*
 * @author Jakob Grätz
