@@ -27,7 +27,7 @@ const KEY_LENGTH: usize = 64;
 pub fn is_date_in_future(date_str: &str) -> bool {
     match NaiveDate::parse_from_str(date_str, "%Y-%m-%d") {
         Ok(input_date) => {
-            let current_date = Local::today().naive_local();
+            let current_date = Local::now().naive_local().into();
             input_date > current_date
         },
         Err(_) => false,
@@ -100,19 +100,11 @@ pub fn check_api_request(id: String, name: String, date: &str) -> bool {
     return true
 }
 
-
-
-
-
-
-
-
 // TESTS
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::prelude::*;
 
     // HELPER FUNCTIONS
 
