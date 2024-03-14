@@ -39,18 +39,6 @@ pub fn is_date_in_future(date_str: &str) -> bool {
 
 /*
 * @author Jakob Grätz
-* @description Checks if a given API key is a valid API key.
-*/
-pub fn check_api_key(api_key: String) -> bool {
-    if api_key == "abc123" {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-/*
-* @author Jakob Grätz
 * @description Generates a new API key (String).
 */
 // to avoid giving out the same API key more than once, API keys will 
