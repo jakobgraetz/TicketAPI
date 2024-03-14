@@ -12,6 +12,4 @@ fn main() {
     print!("[DEV] Testing with 'correct' API key: {:?} \n", api_utils::check_api_key("abc123".to_string()));
     print!("[DEV] Testing with 'incorrect' API key: {:?} \n", api_utils::check_api_key("def456".to_string()));
     print!("[DEV] Testing generate_api_key: {:?} \n", api_utils::generate_api_key());
-    db_handler::handle_db_mod_test();
-    println!("Hello, world!");
 }
