@@ -1,20 +1,30 @@
+/*
+* @author Jakob Grätz, Johannes Schießl
+* @edition 13/03/2024 DD/MM/YYYY
+* @version v0.0.1
+* @description Rust file for api utilities.
+*/
+
 // DEPENDENCIES
 
 extern crate chrono;
 
 use chrono::{NaiveDate, Local};
 
+use rand::Rng;
+use std::collections::HashSet;
+
+// CONSTANTS
+
+const KEY_LENGTH: usize = 64;
+
 // HELPER FUNCTIONS
 
+/*
+* @author Johannes Schießl
+* @description Checks if the input date string represents a date in the future.
+*/
 pub fn is_date_in_future(date_str: &str) -> bool {
-    /// Checks if the input date string represents a date in the future.
-    /// 
-    /// # Arguments
-    /// * `date_str` - A string slice that represents a date in the format "%Y-%m-%d"
-    /// 
-    /// # Returns
-    /// Returns true if the input date is in the future, false otherwise.
-    /// 
     match NaiveDate::parse_from_str(date_str, "%Y-%m-%d") {
         Ok(input_date) => {
             let current_date = Local::today().naive_local();
@@ -24,19 +34,53 @@ pub fn is_date_in_future(date_str: &str) -> bool {
     }
 }
 
+
 // API UTILS
 
+/*
+* @author Jakob Grätz
+* @description Checks if a given API key is a valid API key.
+*/
+pub fn check_api_key(api_key: String) -> bool {
+    if api_key == "abc123" {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/*
+* @author Jakob Grätz
+* @description Generates a new API key (String).
+*/
+// to avoid giving out the same API key more than once, API keys will 
+// need to be stored and the API key generator needs to check if a key 
+// already exists before returning it.
+pub fn generate_api_key() -> String {
+    let mut rng = rand::thread_rng();
+
+    let charset: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.!+-#![]|{}?*'^<>()/&%$";
+    let mut key = String::with_capacity(KEY_LENGTH);
+
+    let mut unique_chars = HashSet::with_capacity(KEY_LENGTH);
+    while key.len() < KEY_LENGTH {
+        // random index within charset range
+        let random_index = rng.gen_range(0..charset.len());
+        // random character from charset
+        let random_char = charset[random_index] as char;
+        if unique_chars.insert(random_char) {
+            key.push(random_char);
+        }
+    }
+    return key;
+}
+
+
+/*
+* @author Johannes Schießl
+* @description Checks the validity of an API request.
+*/
 pub fn check_api_request(id: String, name: String, date: &str) -> bool {
-    /// Checks the validity of an API request.
-    /// 
-    /// # Arguments
-    /// * `id` - A string representing the ID of the request.
-    /// * `name` - A string representing the name associated with the request.
-    /// * `date` - A string reference representing the date of the request in the 'YYYY-MM-DD' format.
-    /// 
-    /// # Returns
-    /// A boolean value indicating whether the API request is valid.
-    /// 
     if id != "abc123" {
         println!("Error: The provided ID '{}' is invalid. Please ensure the ID is correct.", id);
         return false
