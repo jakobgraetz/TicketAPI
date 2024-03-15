@@ -53,6 +53,8 @@ pub fn generate_api_key() -> String {
     let mut unique_chars = HashSet::with_capacity(KEY_LENGTH);
     while key.len() < KEY_LENGTH {
         // random index within charset range
+        // might sometime update this to not only include unique characters in each strings, as that limits
+        // the number of API keys.
         let random_index = rng.gen_range(0..charset.len());
         // random character from charset
         let random_char = charset[random_index] as char;
