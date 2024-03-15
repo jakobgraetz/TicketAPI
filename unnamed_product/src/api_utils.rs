@@ -122,7 +122,7 @@ mod tests {
     #[test]
     fn test_is_date_in_future_with_today_date() {
         // This test may not be reliably predictable unless you mock the current date
-        let today_date = Local::today().format("%Y-%m-%d").to_string();
+        let today_date = Local::now().format("%Y-%m-%d").to_string();
         assert_eq!(is_date_in_future(&today_date), false);
     }
 
@@ -168,6 +168,11 @@ mod tests {
         let name = "John Doe".to_string();
         let date = "2000-01-01"; // Past date
         assert_eq!(check_api_request(id, name, date), false);
+    }
+
+    #[test]
+    fn test_api_key_len() {
+        assert!(KEY_LENGTH==generate_api_key().len())
     }
 
 
