@@ -10,7 +10,6 @@
 extern crate chrono;
 
 use chrono::{NaiveDate, Local};
-
 use rand::Rng;
 use std::collections::HashSet;
 
