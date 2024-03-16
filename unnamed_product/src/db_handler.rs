@@ -14,7 +14,6 @@ use std::error::Error;
 pub async fn test_db() -> Result<(), Box<dyn Error>> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
-    println!("[DEV] Client URI: {:?}", client_uri);
     // A Client is needed to connect to MongoDB:
     // An extra line of code to work around a DNS issue on Windows:
     let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
