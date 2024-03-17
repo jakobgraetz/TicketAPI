@@ -1,12 +1,11 @@
 /*
 * @author Jakob Grätz, Johannes Schießl | @jakobgraetz, @johannesschiessl
-* @edition 13/03/2024 DD/MM/YYYY
+* @edition 17/03/2024 DD/MM/YYYY
 * @version v0.0.1
 * @description Rust file for api utilities.
 */
 
 // DEPENDENCIES
-
 extern crate chrono;
 
 use chrono::{NaiveDate, Local};
@@ -14,11 +13,9 @@ use rand::Rng;
 use std::collections::HashSet;
 
 // CONSTANTS
-
 const KEY_LENGTH: usize = 64;
 
 // HELPER FUNCTIONS
-
 /*
 * @author Johannes Schießl
 * @description Checks if the input date string represents a date in the future.
@@ -33,9 +30,7 @@ pub fn is_date_in_future(date_str: &str) -> bool {
     }
 }
 
-
 // API UTILS
-
 /*
 * @author Jakob Grätz
 * @description Generates a new API key (String).
@@ -64,7 +59,6 @@ pub fn generate_api_key() -> String {
     return key;
 }
 
-
 /*
 * @author Johannes Schießl
 * @description Checks the validity of an API request.
@@ -84,7 +78,6 @@ pub fn check_api_request(id: String, name: String, date: &str) -> bool {
         println!("Success: The provided API request is valid.");
         return true;
     }
-
 }
 
 // TESTS
