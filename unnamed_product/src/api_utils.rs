@@ -87,7 +87,6 @@ mod tests {
     use super::*;
 
     // HELPER FUNCTIONS
-
     // is_date_in_future
     // You may need to mock `is_date_in_future` function to return true for a future date in format
     #[test]
@@ -120,7 +119,6 @@ mod tests {
 
 
     // API UTILS
-
     // check_api_request
     #[test]
     fn test_check_api_request_success() {
@@ -166,6 +164,4 @@ mod tests {
     fn test_api_key_len() {
         assert!(KEY_LENGTH==generate_api_key().len())
     }
-
-
 }
