@@ -70,6 +70,7 @@ pub fn generate_api_key() -> String {
 * @description Checks the validity of an API request.
 */
 pub fn check_api_request(id: String, name: String, date: &str) -> bool {
+    // TODO: Implement API Key here as well.
     if id != "abc123" {
         println!("Error: The provided ID '{}' is invalid. Please ensure the ID is correct.", id);
         return false;
