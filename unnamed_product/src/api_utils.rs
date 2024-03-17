@@ -72,16 +72,16 @@ pub fn generate_api_key() -> String {
 pub fn check_api_request(id: String, name: String, date: &str) -> bool {
     if id != "abc123" {
         println!("Error: The provided ID '{}' is invalid. Please ensure the ID is correct.", id);
-        return false
+        return false;
     } else if !is_date_in_future(date) {
         println!("Error: The provided date '{}' is not in the future or has an invalid format. Please ensure the date is in the 'YYYY-MM-DD' format and is a future date.", date);
-        return false
+        return false;
     } else if name != "John Doe" {
         println!("Error: The provided name '{}' is invalid. Please ensure the name is valid.", name);
-        return false
+        return false;
     } else {
         println!("Success: The provided API request is valid.");
-        return true
+        return true;
     }
 
 }
