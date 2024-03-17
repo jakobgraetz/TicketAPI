@@ -19,7 +19,7 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
     let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
         .await?;
     let client = Client::with_options(options)?;
-    // Print the databases i our MongoDB cluster:
+    // Print the databases in our MongoDB cluster:
     println!("Databases:");
     for name in client.list_database_names(None, None).await? {
         println!("- {}", name);
