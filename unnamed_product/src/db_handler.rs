@@ -10,6 +10,7 @@ use mongodb::{Client, options::{ClientOptions, ResolverConfig}};
 use std::env;
 use std::error::Error;
 
+// define the way a db must look here, in the code, as MongoDB doesn't enforce a schema (NoSQL)
 #[tokio::main]
 pub async fn test_db() -> Result<(), Box<dyn Error>> {
     // Load the MongoDB connection string from an environment variable:
