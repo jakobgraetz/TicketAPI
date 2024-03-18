@@ -14,7 +14,14 @@ use std::error::Error;
 // user db
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 struct User {
-    foo : String
+    #[serde(rename = "_id")] // Rename the field to "_id"
+    id: ObjectId,
+    first_name: &str,
+    last_name: &str,
+    // Organization / Team features might be great here
+    email: &str,
+    api_key_hash: &str,
+    user_password_hash: &str
 }
 
 #[tokio::main]
