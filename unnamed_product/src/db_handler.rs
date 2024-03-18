@@ -22,12 +22,6 @@ struct User {
     user_password_hash: String
 }
 
-pub async fn create_users_collection(database: &Database) -> Result<Collection<User>, mongodb::error::Error> {
-    // Create the "users" collection with the specified schema
-    let collection = database.create_collection("users", None).await?;
-    Ok(collection)
-}
-
 #[tokio::main]
 pub async fn test_db() -> Result<(), Box<dyn Error>> {
     // Load the MongoDB connection string from an environment variable:
