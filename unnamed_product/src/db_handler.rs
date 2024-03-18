@@ -26,3 +26,11 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
     }
     Ok(())
 }
+
+// All functions with the purpose of "write-access", for example: inserting user into db
+
+
+
+
+
+// All functions with the purpose of "read-access", for example: check if a given API key is in db
