@@ -24,6 +24,12 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
     for name in client.list_database_names(None, None).await? {
         println!("- {}", name);
     }
+
+    // TODO: dev, not for production, just so I learn about working with MongoDB.
+    // Get the 'movies' collection from the 'sample_mflix' database:
+  /*let movies = client.database("sample_mflix").collection("movies");
+    println!("Testing MongoDB's sample mflix database:");
+    println!("{:?}", movies);*/
     Ok(())
 }
 
