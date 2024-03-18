@@ -26,6 +26,8 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
     }
 
     // TODO: dev, not for production, just so I learn about working with MongoDB.
+    // Hypothesis: each collection needs a struct defined here for the <T> -> mongodb::Collection<T>
+    // for example: struct Movies -> mongodb::Collection<Movies>
     // Get the 'movies' collection from the 'sample_mflix' database:
   /*let movies = client.database("sample_mflix").collection("movies");
     println!("Testing MongoDB's sample mflix database:");
