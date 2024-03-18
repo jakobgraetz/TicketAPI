@@ -12,6 +12,7 @@ use std::error::Error;
 
 // define the way a db must look here, in the code, as MongoDB doesn't enforce a schema (NoSQL)
 // user db
+/*FIXME: Lifetime parameters
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 struct User {
     #[serde(rename = "_id")] // Rename the field to "_id"
@@ -23,6 +24,7 @@ struct User {
     api_key_hash: &str,
     user_password_hash: &str
 }
+*/
 
 #[tokio::main]
 pub async fn test_db() -> Result<(), Box<dyn Error>> {
@@ -46,6 +48,9 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
   /*let movies = client.database("sample_mflix").collection("movies");
     println!("Testing MongoDB's sample mflix database:");
     println!("{:?}", movies);*/
+    // Delete the 'sample_mflix' database
+    client.database("sample_mflix").drop(None).await?;
+    println!("Deleted database 'sample_mflix'.");
     Ok(())
 }
 
