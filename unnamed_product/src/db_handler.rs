@@ -6,7 +6,7 @@
 * @note The allowed IP in the Atlas Web / DB deployment may needs to be adjusted based on the server IP ...
 */
 
-use mongodb::{Client, options::{ClientOptions, ResolverConfig}};
+use mongodb::{Client, options::{ClientOptions, ResolverConfig}, bson::oid::ObjectId};
 use std::env;
 use std::error::Error;
 
