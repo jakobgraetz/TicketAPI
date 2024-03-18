@@ -11,21 +11,16 @@ use std::env;
 use std::error::Error;
 
 // define the way a db must look here, in the code, as MongoDB doesn't enforce a schema (NoSQL)
-// user db
-/*FIXME: Lifetime parameters
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+// user db - not final in this form
 struct User {
-    #[serde(rename = "_id")] // Rename the field to "_id"
-    id: ObjectId,
-    first_name: &str,
-    last_name: &str,
+    _id: ObjectId,
+    first_name: String,
+    last_name: String,
     // Organization / Team features might be great here
-    email: &str,
-    api_key_hash: &str,
-    user_password_hash: &str
+    email: String,
+    api_key_hash: String,
+    user_password_hash: String
 }
-*/
-
 #[tokio::main]
 pub async fn test_db() -> Result<(), Box<dyn Error>> {
     // Load the MongoDB connection string from an environment variable:
