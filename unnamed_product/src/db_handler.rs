@@ -49,8 +49,8 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
     println!("Testing MongoDB's sample mflix database:");
     println!("{:?}", movies);*/
     // Delete the 'sample_mflix' database
-    client.database("sample_mflix").drop(None).await?;
-    println!("Deleted database 'sample_mflix'.");
+   /*client.database("sample_mflix").drop(None).await?;
+    println!("Deleted database 'sample_mflix'."); */
     Ok(())
 }
 
