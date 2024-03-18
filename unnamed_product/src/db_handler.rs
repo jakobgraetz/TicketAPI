@@ -21,6 +21,7 @@ struct User {
     api_key_hash: String,
     user_password_hash: String
 }
+
 #[tokio::main]
 pub async fn test_db() -> Result<(), Box<dyn Error>> {
     // Load the MongoDB connection string from an environment variable:
