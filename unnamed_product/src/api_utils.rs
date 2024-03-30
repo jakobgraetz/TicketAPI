@@ -81,7 +81,6 @@ pub fn check_api_request(id: String, name: String, date: &str) -> bool {
 }
 
 // TESTS
-
 #[cfg(test)]
 mod tests {
     use super::*;
