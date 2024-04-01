@@ -4,7 +4,9 @@
 * @version v0.0.1
 * @description Main Rust file for backend.
 */
-
+// Why did you remove importing of local modules?
+// Also removing other functionality, while it's not 
+// strictly harmful is not necessary.
 
 /* --------------------- IMPORTS --------------------- */
 
