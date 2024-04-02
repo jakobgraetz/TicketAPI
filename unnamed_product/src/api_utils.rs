@@ -12,6 +12,10 @@ use chrono::{NaiveDate, Local};
 use rand::Rng;
 use std::collections::HashSet;
 
+use rand::rngs::OsRng;
+use rand::RngCore;
+use base64;
+
 // CONSTANTS
 const KEY_LENGTH: usize = 64;
 
@@ -78,6 +82,19 @@ pub fn check_api_request(id: String, name: String, date: &str) -> bool {
         println!("Success: The provided API request is valid.");
         return true;
     }
+}
+
+/*
+* @author Johnannes Schießl
+* @description Generates a new ticket or event id (String) in base 64.
+*/
+pub fn generate_ticket_or_event_id() -> String {
+    let mut random_bytes = [0u8; 9];
+    OsRng.fill_bytes(&mut random_bytes);
+
+    let base64_string = base64::encode(random_bytes);
+
+    base64_string
 }
 
 // TESTS
@@ -164,4 +181,9 @@ mod tests {
     fn test_api_key_len() {
         assert!(KEY_LENGTH==generate_api_key().len())
     }
+
+
+    
+
+
 }
