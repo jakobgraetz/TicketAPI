@@ -25,8 +25,23 @@ mod api_utils;
 #[serde(crate = "rocket::serde")]
 struct Ticket {
     id: usize,
+    event_id: usize,
     title: String,
     description: String,
+    status: String,
+    creation_date: String,
+    update_date: String,
+    close_date: String,
+    customer_name: String,
+    customer_email: String,
+    customer_phone: String,
+    location: String,
+    quantity: usize,
+    price: usize,
+    payment_status: String,
+    payment_date: String,
+    payment_method: String,
+    comments: String,
 }
 
 /* --------------------- ROUTES --------------------- */
@@ -46,7 +61,26 @@ fn create_ticket(ticket: Json<Ticket>) -> Result<Json<Ticket>, status::Custom<Js
 fn get_ticket(id: usize) -> Result<Json<Ticket>, status::Custom<Json<&'static str>>> {
     // Simulating fetching a ticket successfully
     if id != 0 {
-        Ok(Json(Ticket { id, title: "Example Ticket".into(), description: "This is a ticket description.".into() }))
+        Ok(Json(Ticket {
+            id,
+            event_id: 1,
+            title: "Example Title".into(),
+            description: "This is an example description.".into(),
+            status: "Open".into(),
+            creation_date: "2020-01-01".into(),
+            update_date: "2020-01-01".into(),
+            close_date: "2020-01-01".into(),
+            customer_name: "John Doe".into(),
+            customer_email: "johndoe@example.com".into(),
+            customer_phone: "+1 123-456-7890".into(),
+            location: "Example Location".into(),
+            quantity: 1,
+            price: 100,
+            payment_status: "Paid".into(),
+            payment_date: "2020-01-01".into(),
+            payment_method: "Credit Card".into(),
+            comments: "This is an example comment.".into(),
+        }))
     } else {
         // Simulating a "not found" situation
         Err(status::Custom(Status::NotFound, Json("Ticket not found")))
