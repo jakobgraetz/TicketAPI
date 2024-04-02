@@ -182,7 +182,22 @@ mod tests {
         assert!(KEY_LENGTH==generate_api_key().len())
     }
 
+    // generate_ticket_or_event_id
+    #[test]
+    fn test_generate_ticket_or_event_id_length() {
+        let base64_string = generate_ticket_or_event_id();
+        assert_eq!(base64_string.len(), 12);
+    }
 
+    #[test]
+    fn test_generate_ticket_or_event_id_validity() {
+        let base64_string = generate_ticket_or_event_id();
+        // Attempt to decode the Base64 string. This will return an error if the string is not valid Base64.
+        let decode_result = base64::decode(&base64_string);
+
+        // Assert that decoding did not result in an error, implying the string is valid Base64.
+        assert!(decode_result.is_ok());
+    }
     
 
 
