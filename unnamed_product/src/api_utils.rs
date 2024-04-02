@@ -94,6 +94,7 @@ pub fn generate_ticket_or_event_id() -> String {
 
     let base64_string = base64::encode(random_bytes);
 
+    // TODO: Check if the base64 already exists in db
     base64_string
 }
 
