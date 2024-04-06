@@ -43,7 +43,7 @@ pub fn generate_api_key() -> String {
 
     let charset: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.!+-#![]|{}?*'^<>()/&%$";
     let mut key = String::with_capacity(KEY_LENGTH);
-    key.push="sk-";
+    key.push("sk-");
 
     let mut unique_chars = HashSet::with_capacity(KEY_LENGTH);
     while key.len() < KEY_LENGTH + 3 {
