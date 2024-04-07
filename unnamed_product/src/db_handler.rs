@@ -22,6 +22,29 @@ struct User {
     user_password_hash: String
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+struct Ticket {
+    id: usize,
+    event_id: usize,
+    title: String,
+    description: String,
+    status: String,
+    creation_date: String,
+    update_date: String,
+    close_date: String,
+    customer_name: String,
+    customer_email: String,
+    customer_phone: String,
+    location: String,
+    quantity: usize,
+    price: usize,
+    payment_status: String,
+    payment_date: String,
+    payment_method: String,
+    comments: String,
+}
+
 #[tokio::main]
 pub async fn test_db() -> Result<(), Box<dyn Error>> {
     // Load the MongoDB connection string from an environment variable:
