@@ -89,7 +89,7 @@ pub async fn insert_user_document() -> Result<InsertOneResult, mongodb::error::E
         .await?;
     let client = Client::with_options(options)?;
     let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
-    
+
     let user_document = User {
         _id: ObjectId::new(), 
         first_name: "Jakob".to_string(), 
@@ -111,6 +111,7 @@ pub async fn insert_user_document() -> Result<InsertOneResult, mongodb::error::E
     }
 }
 
+/*
 pub async fn insert_ticket_document() {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
@@ -133,7 +134,7 @@ pub async fn insert_ticket_document() {
         }
     }
 }
-
+*/
 
 
 // All functions with the purpose of "read-access", for example: check if a given API key is in db
