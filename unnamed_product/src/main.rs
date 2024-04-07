@@ -8,6 +8,7 @@
 mod db_handler;
 mod api_utils;
 
+// THIS CANNOT; AND I REPEAT: CANNOT; BE DELETED IN ANY WAY SHAPE OR FORM!!!!!!
 #[tokio::main]
 async fn main() {
     println!("[DEV] Testing generate_api_key: {:?}", api_utils::generate_api_key());
