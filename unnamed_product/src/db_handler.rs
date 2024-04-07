@@ -12,6 +12,7 @@ use std::error::Error;
 extern crate serde;
 extern crate serde_json;
 use rocket::{serde::{Deserialize, Serialize}};
+use mongodb::Collection;
 
 // define the way a db must look here, in the code, as MongoDB doesn't enforce a schema (NoSQL)
 // user db - not final in this form
@@ -79,8 +80,32 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
 }
 
 // All functions with the purpose of "write-access", for example: inserting user into db
+pub async fn insert_user_document() -> Result<(), Option> {
+    // Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
+        .await?;
+    let client = Client::with_options(options)?;
+    let user_collection: Collection<User> = client.database("tickets").collection("ignotum-tickets");
+    let user_document = User {_id: 1, first_name: "Jakob".to_string(), last_name: "Grätz".to_string(), email: "jakob.graetz@icloud.com".to_string(), api_key_hash: "my-fake-secret-key".to_string(), user_password_hash: "my-fake-password".to_string()};
 
-
+    let insert_one_result = user_collection.insert_one(user_document, None).await?;
+    println!("Inserted doc with id: {}", insert_one_result.inserted_id);
+    Ok(insert_one_result)
+}
+/*
+pub async fn insert_ticket_document() {
+    / Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
+        .await?;
+    let client = Client::with_options(options)?;
+}
+*/
 
 
 
