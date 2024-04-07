@@ -53,6 +53,7 @@ struct Ticket {
 }
 
 pub async fn test_db() -> Result<(), Box<dyn Error>> {
+    // dev, not for production, just so I learn about working with MongoDB.
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -66,16 +67,15 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
         println!("- {}", name);
     }
 
-    // TODO: dev, not for production, just so I learn about working with MongoDB.
-    // Hypothesis: each collection needs a struct defined here for the <T> -> mongodb::Collection<T>
+    // each collection needs a struct defined here for the <T> -> mongodb::Collection<T>
     // for example: struct Movies -> mongodb::Collection<Movies>
     // Get the 'movies' collection from the 'sample_mflix' database:
-  /*let movies = client.database("sample_mflix").collection("movies");
-    println!("Testing MongoDB's sample mflix database:");
-    println!("{:?}", movies);
+    // let movies = client.database("sample_mflix").collection("movies");
+    // println!("Testing MongoDB's sample mflix database:");
+    // println!("{:?}", movies);
     // Delete the 'sample_mflix' database
-    client.database("sample_mflix").drop(None).await?;
-    println!("Deleted database 'sample_mflix'."); */
+    // client.database("sample_mflix").drop(None).await?;
+    // println!("Deleted database 'sample_mflix'.");
     Ok(())
 }
 
