@@ -89,7 +89,15 @@ pub async fn insert_user_document() -> Result<InsertOneResult, mongodb::error::E
         .await?;
     let client = Client::with_options(options)?;
     let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
-    let user_document = User {_id: ObjectId::new(), first_name: "Jakob".to_string(), last_name: "Grätz".to_string(), email: "jakob.graetz@icloud.com".to_string(), api_key_hash: "my-fake-secret-key".to_string(), user_password_hash: "my-fake-password".to_string()};
+    
+    let user_document = User {
+        _id: ObjectId::new(), 
+        first_name: "Jakob".to_string(), 
+        last_name: "Grätz".to_string(), 
+        email: "jakob.graetz@icloud.com".to_string(), 
+        api_key_hash: "my-fake-secret-key".to_string(), 
+        user_password_hash: "my-fake-password".to_string()
+    };
 
     match user_collection.insert_one(user_document, None).await {
         Ok(insert_one_result) => {
