@@ -32,8 +32,8 @@ struct User {
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 struct Ticket {
-    id: ObjectId,
-    event_id: ObjectId,
+    _id: ObjectId,
+    // event_id: ObjectId,
     title: String,
     description: String,
     status: String,
@@ -111,8 +111,7 @@ pub async fn insert_user_document() -> Result<InsertOneResult, mongodb::error::E
     }
 }
 
-/*
-pub async fn insert_ticket_document() {
+pub async fn insert_ticket_document() -> Result<InsertOneResult, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -120,10 +119,30 @@ pub async fn insert_ticket_document() {
     let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
         .await?;
     let client = Client::with_options(options)?;
-    let user_collection: Collection<Ticket> = client.database("tickets").collection("ignotum-tickets");
-    let user_document = Ticket {_id: ObjectId::new(), first_name: "Jakob".to_string(), last_name: "Grätz".to_string(), email: "jakob.graetz@icloud.com".to_string(), api_key_hash: "my-fake-secret-key".to_string(), user_password_hash: "my-fake-password".to_string()};
+    let ticket_collection: Collection<Ticket> = client.database("tickets").collection("ignotum-tickets");
 
-    match user_collection.insert_one(user_document, None).await {
+    let ticket_document = Ticket {
+        _id: ObjectId::new(),
+        // event_id: ObjectId::new(), 
+        title: "my_title".to_string(), 
+        description: "my description".to_string(), 
+        status: "my status".to_string(), 
+        creation_date: "my creation date".to_string(), 
+        update_date: "my update date".to_string(),
+        close_date: "my close date".to_string(),
+        customer_name: "my customer name".to_string(),
+        customer_email: "my customer email".to_string(),
+        customer_phone: "my customer phone".to_string(),
+        location: "my location".to_string(),
+        quantity: 1,
+        price: 1,
+        payment_status: "my payment status".to_string(),
+        payment_date: "my payment date".to_string(),
+        payment_method: "my payment method".to_string(),
+        comments: "my comments".to_string(),
+    };
+
+    match ticket_collection.insert_one(ticket_document, None).await {
         Ok(insert_one_result) => {
             println!("Inserted doc with id: {}", insert_one_result.inserted_id);
             Ok(insert_one_result)
@@ -134,7 +153,5 @@ pub async fn insert_ticket_document() {
         }
     }
 }
-*/
-
 
 // All functions with the purpose of "read-access", for example: check if a given API key is in db
