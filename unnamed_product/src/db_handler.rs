@@ -9,9 +9,14 @@
 use mongodb::{Client, options::{ClientOptions, ResolverConfig}, bson::oid::ObjectId};
 use std::env;
 use std::error::Error;
+extern crate serde;
+extern crate serde_json;
+use rocket::{serde::{json::Json, Deserialize, Serialize}, http::Status};
 
 // define the way a db must look here, in the code, as MongoDB doesn't enforce a schema (NoSQL)
 // user db - not final in this form
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
 struct User {
     _id: ObjectId,
     first_name: String,
