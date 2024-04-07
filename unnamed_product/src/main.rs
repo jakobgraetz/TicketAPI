@@ -15,4 +15,5 @@ async fn main() {
     db_handler::test_db().await;
     api_utils::check_api_request("abc123".to_string(), "John Doe".to_string(), "2024-04-12");
     db_handler::insert_user_document().await;
+    db_handler::insert_ticket_document().await;
 }
