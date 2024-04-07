@@ -180,3 +180,7 @@ pub async fn get_user_id() {
 pub async fn get_user_data() {
 
 }
+
+pub async fn check_user() {
+    
+}
