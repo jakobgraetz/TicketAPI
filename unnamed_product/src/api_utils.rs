@@ -1,6 +1,6 @@
 /*
 * @author Jakob Grätz, Johannes Schießl | @jakobgraetz, @johannesschiessl
-* @edition 30/03/2024 DD/MM/YYYY
+* @edition 07/04/2024 DD/MM/YYYY
 * @version v0.0.1
 * @description Rust file for api utilities.
 */
