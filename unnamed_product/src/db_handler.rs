@@ -1,11 +1,12 @@
 /*
 * @author Jakob Grätz, Johannes Schießl | @jakobgraetz, @johannesschiessl
-* @edition 30/03/2024 DD/MM/YYYY
+* @edition 07/04/2024 DD/MM/YYYY
 * @version v0.0.1
 * @description Rust file responsible for handling MongoDB (atlas) connection and databases.
 * @note The allowed IP in the Atlas Web / DB deployment may needs to be adjusted based on the server IP ... also export MONGODB_URI env var
 */
 
+// Imports
 use mongodb::{Client, options::{ClientOptions, ResolverConfig}, bson::oid::ObjectId};
 use std::env;
 use std::error::Error;
@@ -29,6 +30,7 @@ struct User {
     user_password_hash: String
 }
 
+// not final
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 struct Ticket {
