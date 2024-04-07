@@ -154,4 +154,27 @@ pub async fn insert_ticket_document() -> Result<InsertOneResult, mongodb::error:
     }
 }
 
+pub async fn delete_user() {
+
+}
+
+pub async fn delete_ticket() {
+
+}
+
 // All functions with the purpose of "read-access", for example: check if a given API key is in db
+pub async fn check_api_key() {
+
+}
+
+pub async fn check_password() {
+
+}
+
+pub async fn get_user_id() {
+
+}
+
+pub async fn get_user_data() {
+
+}
