@@ -179,8 +179,8 @@ pub async fn check_password() {
 
 }
 
-pub async fn get_user_id() {
-
+pub async fn get_user_id(email: String) {
+    println!("[DEV] get_user_id {:?}", email);
 }
 
 pub async fn get_user_data() {
