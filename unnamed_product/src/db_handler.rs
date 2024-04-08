@@ -27,7 +27,8 @@ struct User {
     // Organization / Team features might be great here
     email: String,
     api_key_hash: String,
-    user_password_hash: String
+    user_password_hash: String,
+    // More user info: payment, ...
 }
 
 // not final
