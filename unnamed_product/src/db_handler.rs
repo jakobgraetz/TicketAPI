@@ -128,7 +128,9 @@ pub async fn insert_ticket_document() -> Result<InsertOneResult, mongodb::error:
 
     let ticket_document = Ticket {
         _id: ObjectId::new(),
-        // event_id: ObjectId::new(), 
+        // event_id: ObjectId::new(),
+        // Will not generate a new ID, but insert the ID of the user who created the ticket!!!
+        user_id: ObjectId::new(), 
         title: "my_title".to_string(), 
         description: "my description".to_string(), 
         status: "my status".to_string(), 
