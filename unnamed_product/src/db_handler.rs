@@ -36,6 +36,9 @@ struct User {
 struct Ticket {
     _id: ObjectId,
     // event_id: ObjectId,
+    // This is the id of the user who created the ticket, necessary so we can keep track of who
+    // issued what tickets, billing, ...
+    user_id: ObjectId,
     title: String,
     description: String,
     status: String,
@@ -181,6 +184,18 @@ pub async fn get_user_data() {
 
 }
 
+pub async fn get_ticket_data() {
+
+}
+
+pub async fn get_user_id() {
+
+}
+
+pub async fn check_ticket() {
+
+}
+
 pub async fn check_user() {
-    
+
 }
