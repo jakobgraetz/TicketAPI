@@ -15,6 +15,8 @@ async fn main() {
     // println!("[DEV] Testing test_db: ");
     // db_handler::test_db().await;
     api_utils::check_api_request("abc123".to_string(), "John Doe".to_string(), "2024-04-12");
-    db_handler::insert_user_document().await;
-    db_handler::insert_ticket_document().await;
+    db_handler::get_user_id("jakob.graetz@icloud.com".to_string()).await;
+    // JUST FOR TESTING NOW; MAYBE WILL USE THOSE VALUES IN FUTURE
+    let _ = db_handler::insert_user_document().await;
+    let _ = db_handler::insert_ticket_document().await;
 }

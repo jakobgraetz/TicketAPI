@@ -191,10 +191,6 @@ pub async fn get_ticket_data() {
 
 }
 
-pub async fn get_user_id() {
-
-}
-
 pub async fn check_ticket() {
 
 }
