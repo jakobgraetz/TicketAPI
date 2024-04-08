@@ -57,6 +57,7 @@ struct Ticket {
     comments: String,
 }
 
+/*
 pub async fn test_db() -> Result<(), Box<dyn Error>> {
     // dev, not for production, just so I learn about working with MongoDB.
     // Load the MongoDB connection string from an environment variable:
@@ -83,8 +84,8 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
     // println!("Deleted database 'sample_mflix'.");
     Ok(())
 }
+*/
 
-// All functions with the purpose of "write-access", for example: inserting user into db
 pub async fn insert_user_document() -> Result<InsertOneResult, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
@@ -169,7 +170,6 @@ pub async fn delete_ticket() {
 
 }
 
-// All functions with the purpose of "read-access", for example: check if a given API key is in db
 pub async fn check_api_key() {
 
 }
