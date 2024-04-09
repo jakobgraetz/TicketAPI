@@ -179,8 +179,21 @@ pub async fn check_password() {
 
 }
 
-pub async fn get_user_id(email: String) {
-    println!("[DEV] get_user_id {:?}", email);
+pub async fn get_user_id(email: String) -> String{
+    // Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
+        .await?;
+    let client = Client::with_options(options)?;
+    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
+
+    let filter = { email: "jakob.graetz@icloud.com".to_string() };
+    // There is also find() that returns all records / documents
+    let result = collection.find_one(filter, None).await;
+    println!("[DEV] get_user_id {:?}, apparently it is {:?}", email, result._id);
+    return "LOL".to_string();
 }
 
 pub async fn get_user_data() {
