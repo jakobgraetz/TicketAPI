@@ -6,6 +6,11 @@
 * @note The allowed IP in the Atlas Web / DB deployment may needs to be adjusted based on the server IP ... also export MONGODB_URI env var
 */
 
+/*
+Some good docs for Rust MongoDB:
+https://mongodb.github.io/mongo-rust-driver/manual/reading.html
+https://taharmeijs.medium.com/beginners-guide-to-mongodb-and-rust-8d8d3ef17920
+*/
 // Imports
 use mongodb::{Client, options::{ClientOptions, ResolverConfig}, bson::oid::ObjectId};
 use std::env;
@@ -179,7 +184,7 @@ pub async fn check_password() {
 
 }
 
-pub async fn get_user_id(email: String) -> Result<Option<User>, mongodb::error::Error> {
+pub async fn get_user_id(email: String) -> Result<Option<ObjectId>, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -195,14 +200,19 @@ pub async fn get_user_id(email: String) -> Result<Option<User>, mongodb::error::
     
     match result {
         Ok(Some(ref document)) => {
-            let user_id =  document._id; // Selecting user_id from the document
+            let user_id =  document._id.clone(); // Selecting user_id from the document
             println!("{}", user_id);
+            Ok(Some(user_id))
         },
-        Ok(None) => println!("Unable to find a match in collection."),
-        Err(e) => println!("Error: {:?}", e), // Handle the error case
+        Ok(None) => {
+            println!("Unable to find a match in collection.");
+            Ok(None)
+        },
+        Err(e) => {
+            println!("Error: {:?}", e); // Handle the error case
+            Err(e)
+        }
     }
-
-    return result;
 }
 
 pub async fn get_user_data() {
