@@ -6,6 +6,8 @@
 * @note The allowed IP in the Atlas Web / DB deployment may needs to be adjusted based on the server IP ... also export MONGODB_URI env var
 */
 
+// TODO: Write actual developer documentation for Rust, mainly MongoDB Rust Driver (for me, internal).
+// TODO: Implement actual functionality, or rather more functionality
 /*
 Some good docs for Rust MongoDB:
 https://mongodb.github.io/mongo-rust-driver/manual/reading.html
