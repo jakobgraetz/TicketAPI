@@ -1,6 +1,6 @@
 /*
 * @author Jakob Grätz, Johannes Schießl | @jakobgraetz, @johannesschiessl
-* @edition 07/04/2024 DD/MM/YYYY
+* @edition 09/04/2024 DD/MM/YYYY
 * @version v0.0.1
 * @description Rust file responsible for handling MongoDB (atlas) connection and databases.
 * @note The allowed IP in the Atlas Web / DB deployment may needs to be adjusted based on the server IP ... also export MONGODB_URI env var
@@ -11,6 +11,7 @@ Some good docs for Rust MongoDB:
 https://mongodb.github.io/mongo-rust-driver/manual/reading.html
 https://taharmeijs.medium.com/beginners-guide-to-mongodb-and-rust-8d8d3ef17920
 */
+
 // Imports
 use mongodb::{Client, options::{ClientOptions, ResolverConfig}, bson::oid::ObjectId};
 use std::env;
