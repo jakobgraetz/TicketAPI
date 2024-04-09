@@ -9,12 +9,12 @@
 // Imports
 use mongodb::{Client, options::{ClientOptions, ResolverConfig}, bson::oid::ObjectId};
 use std::env;
-use std::error::Error;
 extern crate serde;
 extern crate serde_json;
 use rocket::{serde::{Deserialize, Serialize}};
 use mongodb::Collection;
 use mongodb::results::InsertOneResult;
+use bson::doc;
 
 // define the way a db must look here, in the code, as MongoDB doesn't enforce a schema (NoSQL)
 // user db - not final in this form
@@ -179,7 +179,7 @@ pub async fn check_password() {
 
 }
 
-pub async fn get_user_id(email: String) -> String{
+pub async fn get_user_id(email: String) -> Result<InsertOneResult, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -189,11 +189,11 @@ pub async fn get_user_id(email: String) -> String{
     let client = Client::with_options(options)?;
     let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
 
-    let filter = { email: "jakob.graetz@icloud.com".to_string() };
+    let filter = doc! { "email": "jakob.graetz@icloud.com".to_string() };
     // There is also find() that returns all records / documents
     let result = collection.find_one(filter, None).await;
     println!("[DEV] get_user_id {:?}, apparently it is {:?}", email, result._id);
-    return "LOL".to_string();
+    return result;
 }
 
 pub async fn get_user_data() {
