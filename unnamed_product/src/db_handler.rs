@@ -179,7 +179,7 @@ pub async fn check_password() {
 
 }
 
-pub async fn get_user_id(email: String) -> Result<InsertOneResult, mongodb::error::Error> {
+pub async fn get_user_id(email: String) -> Result<Option<User>, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -189,10 +189,19 @@ pub async fn get_user_id(email: String) -> Result<InsertOneResult, mongodb::erro
     let client = Client::with_options(options)?;
     let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
 
-    let filter = doc! { "email": "jakob.graetz@icloud.com".to_string() };
+    let filter = doc! { "email": email };
     // There is also find() that returns all records / documents
-    let result = collection.find_one(filter, None).await;
-    println!("[DEV] get_user_id {:?}, apparently it is {:?}", email, result._id);
+    let result = user_collection.find_one(filter, None).await;
+    
+    match result {
+        Ok(Some(ref document)) => {
+            let user_id =  document._id; // Selecting user_id from the document
+            println!("{}", user_id);
+        },
+        Ok(None) => println!("Unable to find a match in collection."),
+        Err(e) => println!("Error: {:?}", e), // Handle the error case
+    }
+
     return result;
 }
 
