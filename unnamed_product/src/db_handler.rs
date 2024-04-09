@@ -3,7 +3,7 @@
 * @edition 09/04/2024 DD/MM/YYYY
 * @version v0.0.1
 * @description Rust file responsible for handling MongoDB (atlas) connection and databases.
-* @note The allowed IP in the Atlas Web / DB deployment may needs to be adjusted based on the server IP ... also export MONGODB_URI env var
+* @note The allowed IP in the Atlas Web / DB deployment may needs to be adjusted based on the server or rather, client, IP ... also export MONGODB_URI env var
 */
 
 // TODO: Write actual developer documentation for Rust, mainly MongoDB Rust Driver (for me, internal).
