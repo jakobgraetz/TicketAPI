@@ -202,7 +202,7 @@ pub async fn get_user_id(email: String) -> Result<Option<ObjectId>, mongodb::err
     match result {
         Ok(Some(ref document)) => {
             let user_id =  document._id.clone(); // Selecting user_id from the document
-            println!("{}", user_id);
+            println!("user id {:?}", user_id);
             Ok(Some(user_id))
         },
         Ok(None) => {
