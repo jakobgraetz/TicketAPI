@@ -95,7 +95,7 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
 }
 */
 
-pub async fn insert_user_document() -> Result<InsertOneResult, mongodb::error::Error> {
+pub async fn insert_user_document(first_name: String, last_name: String, email: String) -> Result<InsertOneResult, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -107,9 +107,9 @@ pub async fn insert_user_document() -> Result<InsertOneResult, mongodb::error::E
 
     let user_document = User {
         _id: ObjectId::new(), 
-        first_name: "Jakob".to_string(), 
-        last_name: "Grätz".to_string(), 
-        email: "jakob.graetz@icloud.com".to_string(), 
+        first_name: first_name, 
+        last_name: last_name, 
+        email: email, 
         api_key_hash: "my-fake-secret-key".to_string(), 
         user_password_hash: "my-fake-password".to_string()
     };
