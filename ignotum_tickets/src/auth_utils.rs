@@ -18,9 +18,6 @@ use argon2::{
 use rand::Rng;
 use std::collections::HashSet;
 
-// CONSTANTS
-const KEY_LENGTH: usize = 64;
-
 pub fn hash_string (data: String) -> Result<(String, String), argon2::password_hash::Error> {
     let salt = SaltString::generate(&mut OsRng);
 
@@ -64,6 +61,8 @@ pub fn check_string (salt: String, plain: String, hash: String) -> Result<bool, 
 }
 
 pub fn generate_api_key() -> String {
+    const KEY_LENGTH: usize = 64;
+    
     let mut rng = rand::thread_rng();
 
     let charset: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.!+-#![]|{}?*'^<>()/&%$";
