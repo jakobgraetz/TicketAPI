@@ -17,6 +17,26 @@ async fn main() {
         hash_tuple.0,
         hash_tuple.1,
     );
+    println!("Checking with correct plain, hash and salt:");
+    auth_utils::check_string("faozt5o1Fbep6T2v+wmwyg".to_string(), 
+        "A quick brown fox jumps over the lazy frog. 123456789!?".to_string(),
+        "bsNljGi1cQDH/G6V+OJqbA/XUJLAFlDXMrnnusGnuqQ".to_string()
+    );
+    println!("Checking with incorrect plain, correct hash and salt:");
+    auth_utils::check_string("faozt5o1Fbep6T2v+wmwyg".to_string(), 
+        "A quick brown fox jumps ovdder the lazy frog. 123456789!?".to_string(),
+        "bsNljGi1cQDH/G6V+OJqbA/XUJLAFlDXMrnnusGnuqQ".to_string()
+    );
+    println!("Checking with incorrect plain, incorrect hash and correct salt:");
+    auth_utils::check_string("faozt5o1Fbep6T2v+wmwyg".to_string(), 
+        "A quick brown fox jumps ovdder the ldsazy frog. 123456789!?".to_string(),
+        "bsNljGi1cQDH/G6V+OJqbA/XUJLAFlDXMrnnuadssGnuqQ".to_string()
+    );
+    println!("Checking with correct plain, incorrect hash and salt:");
+    auth_utils::check_string("faozt5o1Fbep6T2v+wmwyg".to_string(), 
+        "A quick brown fox jumps over the lazy frog. 123456789!?".to_string(),
+        "bsNljGi1cQDH/G6V+OJqbA/XUJLAFlDXMrasdasdnnusGnuqQ".to_string()
+    );
     println!("[DEV] Testing generate_api_key: {:?}", auth_utils::generate_api_key());
     // println!("[DEV] Testing test_db: ");
     // db_handler::test_db().await;
