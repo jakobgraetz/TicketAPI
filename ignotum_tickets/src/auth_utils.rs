@@ -22,7 +22,7 @@ use std::collections::HashSet;
 const KEY_LENGTH: usize = 64;
 
 // TODO: stop it from adding its own options to the hash
-pub fn hash_string (data: String) -> Result<(String, SaltString), argon2::password_hash::Error> {
+pub fn hash_string (data: String) -> Result<(String, String), argon2::password_hash::Error> {
     let salt = SaltString::generate(&mut OsRng);
 
     let argon2 = Argon2::default();
@@ -35,8 +35,12 @@ pub fn hash_string (data: String) -> Result<(String, SaltString), argon2::passwo
 
     println!("{:?}", hash);
     println!("{:?}", salt);
+
+    Ok((hash, salt.to_string()))
+}
+
+pub fn check_string (salt: String, plain: String, hash: String) -> bool {
     
-    Ok((hash, salt))
 }
 
 pub fn generate_api_key() -> String {
