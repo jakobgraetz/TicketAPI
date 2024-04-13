@@ -40,8 +40,8 @@ pub fn hash_string (data: String) -> Result<(String, String), argon2::password_h
 }
 
 // @author Jakob Grätz
+// Hashes plain text string and compares it to a given hash
 pub fn check_string (salt: String, plain: String, hash: String) -> Result<bool, argon2::password_hash::Error> {
-    // Hashes plain text string and compares it to a given hash
     let new_salt = match SaltString::from_b64(&salt) {
         Ok(salt) => salt,
         Err(err) => panic!("Unexpected behavior when generating SaltString"),
@@ -56,10 +56,10 @@ pub fn check_string (salt: String, plain: String, hash: String) -> Result<bool, 
     };
 
     if hash == hash_content {
-        println!("{:?} matches {:?}", hash_content, hash);
+        println!("{:?} = {:?}", hash_content, hash);
         Ok(true)
     } else {
-        println!("{:?} does not match {:?}", hash_content, hash);
+        println!("{:?} != {:?}", hash_content, hash);
         Ok(false)
     }
 }
