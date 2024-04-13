@@ -6,28 +6,20 @@
 */
 
 extern crate argon2;
-use argon2::{self, Config, ThreadMode, Variant, Version};
+use argon2::{
+    password_hash::{
+        rand_core::OsRng,
+        PasswordHash, PasswordHasher, PasswordVerifier, SaltString
+    },
+    Argon2
+};
 
-// Hash password
-pub fn hash_password (password: String) -> Result<(String, String), argon2::Error> {
-    // Generates a cryptographically secure salt string
-    let salt = argon2::generate_salt();
+// TODO: stop it from adding its own options to the hash
+pub fn hash_string (data: String) -> Result<(String, String), argon2::password_hash::Error> {
+    let salt = SaltString::generate(&mut OsRng);
 
-    // config for hashing the password
-    let config = Config {
-        variant: Variant::Argon2id,
-        version: Version::Version13,
-        mem_cost: 65536,
-        time_cost: 10,
-        lanes: 4,
-        thread_mode: ThreadMode::Parallel,
-        secret: &[],
-        ad: &[],
-        hash_length: 32,
-    };
+    let argon2 = Argon2::default();
 
-    let hash = argon2::hash_encoded(password.as_bytes(), &salt, &config)?;
-
-    Ok(hash, hex::encode(&salt))
+    let data_hash = argon2.hash_password(data.as_bytes(), &salt)?.to_string();
+    Ok((data_hash, salt.to_string()))
 }
-// Hash API Key
