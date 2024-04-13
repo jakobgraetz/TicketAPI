@@ -18,7 +18,7 @@ async fn main() {
         hash_tuple.1,
     );
     println!("Checking with correct plain, hash and salt:");
-    auth_utils::check_string("faozt5o1Fbep6T2v+wmwyg".to_string(), 
+    let _ = auth_utils::check_string("faozt5o1Fbep6T2v+wmwyg".to_string(), 
         "A quick brown fox jumps over the lazy frog. 123456789!?".to_string(),
         "bsNljGi1cQDH/G6V+OJqbA/XUJLAFlDXMrnnusGnuqQ".to_string()
     );
