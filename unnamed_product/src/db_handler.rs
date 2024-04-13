@@ -171,7 +171,7 @@ pub async fn insert_ticket_document() -> Result<InsertOneResult, mongodb::error:
         }
     }
 }
-
+/*
 pub async fn delete_user() {
 
 }
@@ -187,7 +187,7 @@ pub async fn check_api_key() {
 pub async fn check_password() {
 
 }
-
+*/
 pub async fn get_user_id(email: String) -> Result<Option<ObjectId>, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
@@ -218,7 +218,7 @@ pub async fn get_user_id(email: String) -> Result<Option<ObjectId>, mongodb::err
         }
     }
 }
-
+/* 
 pub async fn get_user_data() {
 
 }
@@ -234,3 +234,4 @@ pub async fn check_ticket() {
 pub async fn check_user() {
 
 }
+*/
