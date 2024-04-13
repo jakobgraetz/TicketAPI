@@ -32,8 +32,10 @@ pub fn hash_string (data: String) -> Result<(String, SaltString), argon2::passwo
         Some(h) => h.to_string(),
         None => "error".to_string(), //TODO: error handling wizardry
     };
+
     println!("{:?}", hash);
     println!("{:?}", salt);
+    
     Ok((hash, salt))
 }
 
