@@ -8,9 +8,10 @@
 extern crate argon2;
 use argon2::{
     password_hash::{
-        rand_core::OsRng,
+        rand_core::OsRng, 
+        Error,
         /*PasswordHash,*/ PasswordHasher, /*PasswordVerifier,*/ SaltString, /*Salt*/
-        // Error
+        
     },
     Argon2
 };
@@ -29,20 +30,13 @@ pub fn hash_string (data: String) -> Result<(String, SaltString), argon2::passwo
     let data_hash = argon2.hash_password(data.as_bytes(), &salt)?;
     let hash = match data_hash.hash {
         Some(h) => h.to_string(),
-        None => "exception".to_string(), //TODO: error handling wizardry
+        None => "error".to_string(), //TODO: error handling wizardry
     };
     println!("{:?}", hash);
     println!("{:?}", salt);
     Ok((hash, salt))
 }
 
-/*
-* @author Jakob Grätz
-* @description Generates a new API key (String).
-*/
-// to avoid giving out the same API key more than once, API keys will 
-// need to be stored and the API key generator needs to check if a key 
-// already exists before returning it.
 pub fn generate_api_key() -> String {
     let mut rng = rand::thread_rng();
 
