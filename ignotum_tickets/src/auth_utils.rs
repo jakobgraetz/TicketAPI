@@ -2,7 +2,7 @@
 * @author Jakob Grätz, Johannes Schießl | @jakobgraetz, @johannesschiessl
 * @edition 13/04/2024 DD/MM/YYYY
 * @version v0.0.1
-* @description Rust file for authentication utilities.
+* @description Rust file for authentication utilities, like hashing, key gen, ...
 */
 
 extern crate argon2;
@@ -62,7 +62,7 @@ pub fn check_string (salt: String, plain: String, hash: String) -> Result<bool, 
 
 pub fn generate_api_key() -> String {
     const KEY_LENGTH: usize = 64;
-    
+
     let mut rng = rand::thread_rng();
 
     let charset: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.!+-#![]|{}?*'^<>()/&%$";
