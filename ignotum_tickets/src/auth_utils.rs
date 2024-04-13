@@ -21,7 +21,6 @@ use std::collections::HashSet;
 // CONSTANTS
 const KEY_LENGTH: usize = 64;
 
-// TODO: stop it from adding its own options to the hash
 pub fn hash_string (data: String) -> Result<(String, String), argon2::password_hash::Error> {
     let salt = SaltString::generate(&mut OsRng);
 
