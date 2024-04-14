@@ -180,14 +180,6 @@ pub async fn delete_user() {
 pub async fn delete_ticket() {
 
 }
-
-pub async fn check_api_key() {
-
-}
-
-pub async fn check_password() {
-
-}
 */
 
 /*
