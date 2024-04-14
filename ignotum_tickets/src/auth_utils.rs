@@ -40,7 +40,7 @@ pub fn hash_string (data: String) -> Result<(String, String), argon2::password_h
 pub fn check_string (salt: String, plain: String, hash: String) -> Result<bool, argon2::password_hash::Error> {
     let new_salt = match SaltString::from_b64(&salt) {
         Ok(salt) => salt,
-        Err(err) => panic!("Unexpected behavior when generating SaltString"),
+        Err(err) => panic!("Unexpected behavior when generating SaltString {:?}", err),
     };
     
     let argon2 = Argon2::default();
