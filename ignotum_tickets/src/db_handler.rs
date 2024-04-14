@@ -307,7 +307,3 @@ pub async fn get_ticket_data() {
 pub async fn check_ticket() {
 
 }
-
-pub async fn get_all_owned_tickets(email: String) {
-
-}
