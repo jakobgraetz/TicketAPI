@@ -172,15 +172,15 @@ pub async fn insert_ticket_document(title: String, description: String, status: 
         }
     }
 }
-/*
-pub async fn delete_user() {
+
+pub async fn delete_user(email: String) {
 
 }
 
+// Will delete ticket with unique id.
 pub async fn delete_ticket() {
 
 }
-*/
 
 /*
 - handling all getting operations in one function
@@ -285,18 +285,16 @@ pub async fn get_user_data(email: String) -> Result<Option<User>, mongodb::error
         }
     }
 }
-/* 
-
 
 pub async fn get_ticket_data() {
 
 }
 
+// Checks existence of ticket with id
 pub async fn check_ticket() {
 
 }
 
-pub async fn get_all_owned_tickets {
+pub async fn get_all_owned_tickets(email: String) {
 
 }
-*/
