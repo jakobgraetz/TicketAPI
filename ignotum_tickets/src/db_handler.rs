@@ -27,9 +27,9 @@ use bson::doc;
 
 // define the way a db must look here, in the code, as MongoDB doesn't enforce a schema (NoSQL)
 // user db - not final in this form
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(crate = "rocket::serde")]
-struct User {
+pub struct User {
     _id: ObjectId,
     first_name: String,
     last_name: String,
@@ -44,7 +44,7 @@ struct User {
 // not final
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
-struct Ticket {
+pub struct Ticket {
     _id: ObjectId,
     // event_id: ObjectId,
     // This is the id of the user who created the ticket, necessary so we can keep track of who
@@ -189,8 +189,9 @@ pub async fn check_password() {
 
 }
 */
-// Unsure if we really need a fn that returns all user data AND fns that return specific pieces of data.
-// but will let this remain for now.
+
+/*
+- handling all getting operations in one function
 pub async fn get_user_id(email: String) -> Result<Option<ObjectId>, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
@@ -221,6 +222,7 @@ pub async fn get_user_id(email: String) -> Result<Option<ObjectId>, mongodb::err
         }
     }
 }
+*/
 
 pub async fn check_user(email: String) -> Result<bool, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
