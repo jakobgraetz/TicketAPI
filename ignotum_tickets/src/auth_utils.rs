@@ -8,10 +8,8 @@
 extern crate argon2;
 use argon2::{
     password_hash::{
-        rand_core::OsRng, 
-        // Error,
-        /*PasswordHash,*/ PasswordHasher, /*PasswordVerifier,*/ SaltString, /*Salt*/
-        
+        rand_core::OsRng,
+        PasswordHasher, SaltString
     },
     Argon2
 };
