@@ -173,8 +173,21 @@ pub async fn insert_ticket_document(title: String, description: String, status: 
     }
 }
 
-pub async fn delete_user(email: String) {
+pub async fn delete_user(email: String) -> Result<(), mongodb::error::Error> {
+    // Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
+        .await?;
+    let client = Client::with_options(options)?;
+    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
 
+    let filter = doc! { "email": email };
+
+    let result = user_collection.delete_one(filter, None).await?;
+    println!("Deleted {:?} documents.", result.deleted_count);
+    Ok(())
 }
 
 // Will delete ticket with unique id.
