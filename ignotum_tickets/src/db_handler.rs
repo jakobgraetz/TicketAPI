@@ -231,7 +231,7 @@ pub async fn check_user(email: String) -> Result<bool, mongodb::error::Error> {
     let result = user_collection.find_one(filter, None).await;
 
     match result {
-        Ok(Some(ref document)) => {
+        Ok(Some(ref _document)) => {
             println!("Found a match in collection.");
             Ok(true)
         },

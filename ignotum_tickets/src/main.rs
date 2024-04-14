@@ -26,8 +26,6 @@ async fn main() {
     println!("[DEV] Testing generate_api_key: {:?}", auth_utils::generate_api_key());
     // println!("[DEV] Testing test_db: ");
     // db_handler::test_db().await;
-    api_utils::check_api_request("abc123".to_string(), "John Doe".to_string(), "2024-09-12");
-    let _ = db_handler::get_user_id("jakob.graetz@icloud.com".to_string()).await;
     // JUST FOR TESTING NOW; MAYBE WILL USE THOSE VALUES IN FUTURE
     // let _ = db_handler::insert_user_document().await;
     // let _ = db_handler::insert_ticket_document().await;
