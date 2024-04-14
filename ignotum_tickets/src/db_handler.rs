@@ -113,7 +113,8 @@ pub async fn insert_user_document(first_name: String, last_name: String, email: 
         last_name: last_name, 
         email: email, 
         api_key_hash: api_key_hash, 
-        user_password_hash: user_password_hash
+        user_password_hash: user_password_hash,
+        salt: salt,
     };
 
     match user_collection.insert_one(user_document, None).await {
@@ -188,6 +189,8 @@ pub async fn check_password() {
 
 }
 */
+// Unsure if we really need a fn that returns all user data AND fns that return specific pieces of data.
+// but will let this remain for now.
 pub async fn get_user_id(email: String) -> Result<Option<ObjectId>, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
@@ -219,20 +222,83 @@ pub async fn get_user_id(email: String) -> Result<Option<ObjectId>, mongodb::err
     }
 }
 
-/* 
-pub async fn get_user_data() {
+pub async fn check_user(email: String) -> Result<bool, mongodb::error::Error> {
+    // Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
+        .await?;
+    let client = Client::with_options(options)?;
+    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
 
+    let filter = doc! { "email": email };
+    // There is also find() that returns all records / documents
+    let result = user_collection.find_one(filter, None).await;
+
+    match result {
+        Ok(Some(ref document)) => {
+            println!("Found a match in collection.");
+            Ok(true)
+        },
+        Ok(None) => {
+            println!("Unable to find a match in collection.");
+            Ok(false)
+        },
+        Err(e) => {
+            println!("Error: {:?}", e); // Handle the error case
+            Err(e)
+        }
+    }
 }
+
+pub async fn get_user_data(email: String) -> Result<Option<User>, mongodb::error::Error> {
+    // Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
+        .await?;
+    let client = Client::with_options(options)?;
+    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
+
+    let filter = doc! { "email": email };
+    // There is also find() that returns all records / documents
+    let result = user_collection.find_one(filter, None).await;
+    
+    match result {
+        Ok(Some(ref document)) => {
+            let user =  User {
+                // user data
+                _id: document._id.clone(),
+                first_name: document.first_name.clone(),
+                last_name: document.last_name.clone(),
+                email: document.email.clone(),
+                api_key_hash: document.api_key_hash.clone(),
+                user_password_hash: document.user_password_hash.clone(),
+                salt: document.salt.clone(),
+            };
+            
+            Ok(Some(user))
+        },
+        Ok(None) => {
+            println!("Unable to find a match in collection.");
+            Ok(None)
+        },
+        Err(e) => {
+            println!("Error: {:?}", e); // Handle the error case
+            Err(e)
+        }
+    }
+}
+/* 
+
 
 pub async fn get_ticket_data() {
 
 }
 
 pub async fn check_ticket() {
-
-}
-
-pub async fn check_user() {
 
 }
 
