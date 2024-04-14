@@ -37,6 +37,7 @@ struct User {
     email: String,
     api_key_hash: String,
     user_password_hash: String,
+    salt:  String,
     // More user info: payment, ...
 }
 
@@ -96,7 +97,7 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
 }
 */
 
-pub async fn insert_user_document(first_name: String, last_name: String, email: String, api_key_hash: String, user_password_hash: String) -> Result<InsertOneResult, mongodb::error::Error> {
+pub async fn insert_user_document(first_name: String, last_name: String, email: String, api_key_hash: String, user_password_hash: String, salt: String) -> Result<InsertOneResult, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -232,6 +233,10 @@ pub async fn check_ticket() {
 }
 
 pub async fn check_user() {
+
+}
+
+pub async fn get_all_owned_tickets {
 
 }
 */
