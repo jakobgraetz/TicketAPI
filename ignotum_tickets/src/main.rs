@@ -29,5 +29,5 @@ async fn main() {
     let _ = db_handler::get_user_id("jakob.graetz@icloud.com".to_string()).await;
     // JUST FOR TESTING NOW; MAYBE WILL USE THOSE VALUES IN FUTURE
     // let _ = db_handler::insert_user_document().await;
-    let _ = db_handler::insert_ticket_document().await;
+    // let _ = db_handler::insert_ticket_document().await;
 }

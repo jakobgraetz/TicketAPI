@@ -61,10 +61,10 @@ struct Ticket {
     location: String,
     quantity: usize,
     price: usize,
+    // Maybe bool in future.
     payment_status: String,
     payment_date: String,
     payment_method: String,
-    comments: String,
 }
 
 /*
@@ -96,7 +96,7 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
 }
 */
 
-pub async fn insert_user_document(first_name: String, last_name: String, email: String) -> Result<InsertOneResult, mongodb::error::Error> {
+pub async fn insert_user_document(first_name: String, last_name: String, email: String, api_key_hash: String, user_password_hash: String) -> Result<InsertOneResult, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -111,8 +111,8 @@ pub async fn insert_user_document(first_name: String, last_name: String, email: 
         first_name: first_name, 
         last_name: last_name, 
         email: email, 
-        api_key_hash: "my-fake-secret-key".to_string(), 
-        user_password_hash: "my-fake-password".to_string()
+        api_key_hash: api_key_hash, 
+        user_password_hash: user_password_hash
     };
 
     match user_collection.insert_one(user_document, None).await {
@@ -127,7 +127,7 @@ pub async fn insert_user_document(first_name: String, last_name: String, email: 
     }
 }
 
-pub async fn insert_ticket_document() -> Result<InsertOneResult, mongodb::error::Error> {
+pub async fn insert_ticket_document(title: String, description: String, status: String, creation_date: String, update_date: String, close_date: String, customer_name: String, customer_email: String, customer_phone: String, location: String, quantity: usize, price: usize, payment_status: String, payment_date: String, payment_method: String) -> Result<InsertOneResult, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -142,22 +142,21 @@ pub async fn insert_ticket_document() -> Result<InsertOneResult, mongodb::error:
         // event_id: ObjectId::new(),
         // Will not generate a new ID, but insert the ID of the user who created the ticket!!!
         user_id: ObjectId::new(), 
-        title: "my_title".to_string(), 
-        description: "my description".to_string(), 
-        status: "my status".to_string(), 
-        creation_date: "my creation date".to_string(), 
-        update_date: "my update date".to_string(),
-        close_date: "my close date".to_string(),
-        customer_name: "my customer name".to_string(),
-        customer_email: "my customer email".to_string(),
-        customer_phone: "my customer phone".to_string(),
-        location: "my location".to_string(),
-        quantity: 1,
-        price: 1,
-        payment_status: "my payment status".to_string(),
-        payment_date: "my payment date".to_string(),
-        payment_method: "my payment method".to_string(),
-        comments: "my comments".to_string(),
+        title: title, 
+        description: description, 
+        status: status, 
+        creation_date: creation_date, 
+        update_date: update_date,
+        close_date: close_date,
+        customer_name: customer_name,
+        customer_email: customer_email,
+        customer_phone: customer_phone,
+        location: location,
+        quantity: quantity,
+        price: price,
+        payment_status: payment_status,
+        payment_date: payment_date,
+        payment_method: payment_method
     };
 
     match ticket_collection.insert_one(ticket_document, None).await {
