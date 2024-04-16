@@ -325,7 +325,7 @@ pub async fn check_ticket(ticket_id: ObjectId) -> Result<bool, mongodb::error::E
     let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
         .await?;
     let client = Client::with_options(options)?;
-    let ticket_collection: Collection<User> = client.database("users").collection("ignotum-users");
+    let ticket_collection: Collection<User> = client.database("tickets").collection("ignotum-tickets");
 
     let filter = doc! { "_id": ticket_id };
     // There is also find() that returns all records / documents
