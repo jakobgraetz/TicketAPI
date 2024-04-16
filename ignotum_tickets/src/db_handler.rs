@@ -191,7 +191,7 @@ pub async fn delete_user(email: String) -> Result<(), mongodb::error::Error> {
 }
 
 // Will delete ticket with unique id.
-pub async fn delete_ticket(ticket_id: ObjectId) {
+pub async fn delete_ticket(ticket_id: ObjectId) -> Result<(), mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -317,6 +317,32 @@ pub async fn get_ticket_data() {
 }
 
 // Checks existence of ticket with id
-pub async fn check_ticket() {
+pub async fn check_ticket(ticket_id: ObjectId) -> Result<bool, mongodb::error::Error> {
+    // Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
+        .await?;
+    let client = Client::with_options(options)?;
+    let ticket_collection: Collection<User> = client.database("users").collection("ignotum-users");
 
+    let filter = doc! { "_id": ticket_id };
+    // There is also find() that returns all records / documents
+    let result = ticket_collection.find_one(filter, None).await;
+
+    match result {
+        Ok(Some(ref _document)) => {
+            println!("Found a match in collection.");
+            Ok(true)
+        },
+        Ok(None) => {
+            println!("Unable to find a match in collection.");
+            Ok(false)
+        },
+        Err(e) => {
+            println!("Error: {:?}", e); // Handle the error case
+            Err(e)
+        }
+    }
 }
