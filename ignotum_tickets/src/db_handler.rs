@@ -312,6 +312,7 @@ pub async fn get_user_data(email: String) -> Result<Option<User>, mongodb::error
     }
 }
 
+// If the user owns a ticket (though that is not a problem, as each ticket has a unique id) it will return all the ticket data
 pub async fn get_ticket_data() {
 
 }
