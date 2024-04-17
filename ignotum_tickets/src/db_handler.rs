@@ -129,7 +129,8 @@ pub async fn insert_user_document(first_name: String, last_name: String, email: 
     }
 }
 
-pub async fn insert_ticket_document(title: String, description: String, status: String, creation_date: String, update_date: String, close_date: String, customer_name: String, customer_email: String, customer_phone: String, location: String, quantity: usize, price: usize, payment_status: String, payment_date: String, payment_method: String) -> Result<InsertOneResult, mongodb::error::Error> {
+// description: String, customer_name: String, customer_email: String, customer_phone: String, location: String, quantity: usize, price: usize, payment_status: String, payment_date: String, payment_method: String
+pub async fn insert_ticket_document(user_id: ObjectId(), title: String, status: String, creation_date: String, update_date: String, close_date: String) -> Result<InsertOneResult, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -141,24 +142,22 @@ pub async fn insert_ticket_document(title: String, description: String, status: 
 
     let ticket_document = Ticket {
         _id: ObjectId::new(),
-        // event_id: ObjectId::new(),
-        // Will not generate a new ID, but insert the ID of the user who created the ticket!!!
-        user_id: ObjectId::new(), 
-        title: title, 
+        user_id: user_id, 
+        // title: title, 
         description: description, 
         status: status, 
         creation_date: creation_date, 
         update_date: update_date,
         close_date: close_date,
-        customer_name: customer_name,
-        customer_email: customer_email,
-        customer_phone: customer_phone,
-        location: location,
-        quantity: quantity,
-        price: price,
-        payment_status: payment_status,
-        payment_date: payment_date,
-        payment_method: payment_method
+        // customer_name: customer_name,
+        // customer_email: customer_email,
+        // customer_phone: customer_phone,
+        // location: location,
+        // quantity: quantity,
+        // price: price,
+        // payment_status: payment_status,
+        // payment_date: payment_date,
+        // payment_method: payment_method
     };
 
     match ticket_collection.insert_one(ticket_document, None).await {
