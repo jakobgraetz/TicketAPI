@@ -51,21 +51,21 @@ pub struct Ticket {
     // issued what tickets, billing, ...
     user_id: ObjectId,
     title: String,
-    description: String,
+    // description: String,
     status: String,
     creation_date: String,
     update_date: String,
     close_date: String,
-    customer_name: String,
-    customer_email: String,
-    customer_phone: String,
-    location: String,
-    quantity: usize,
-    price: usize,
+    // customer_name: String,
+    // customer_email: String,
+    // customer_phone: String,
+    // location: String,
+    // quantity: usize,
+    // price: usize,
     // Maybe bool in future.
-    payment_status: String,
-    payment_date: String,
-    payment_method: String,
+    // payment_status: String,
+    // payment_date: String,
+    // payment_method: String,
 }
 
 /*
@@ -199,7 +199,7 @@ pub async fn delete_ticket(ticket_id: ObjectId) -> Result<(), mongodb::error::Er
     let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
         .await?;
     let client = Client::with_options(options)?;
-    let ticket_collection: Collection<User> = client.database("tickets").collection("ignotum-tickets");
+    let ticket_collection: Collection<Ticket> = client.database("tickets").collection("ignotum-tickets");
 
     let filter = doc! { "_id": ticket_id };
 
@@ -313,8 +313,54 @@ pub async fn get_user_data(email: String) -> Result<Option<User>, mongodb::error
 }
 
 // If the user owns a ticket (though that is not a problem, as each ticket has a unique id) it will return all the ticket data
-pub async fn get_ticket_data(user_od: ObjectId, ticket_id: ObjectId) {
+pub async fn get_ticket_data(user_id: ObjectId, ticket_id: ObjectId) -> Result<Option<Ticket>, mongodb::error::Error> {
+    // Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
+        .await?;
+    let client = Client::with_options(options)?;
+    let ticket_collection: Collection<Ticket> = client.database("tickets").collection("ignotum-tickets");
 
+    let filter = doc! { "_id": ticket_id, "ticket_id": ticket_id };
+    // There is also find() that returns all records / documents
+    let result = ticket_collection.find_one(filter, None).await;
+    
+    match result {
+        Ok(Some(ref document)) => {
+            // TICKET
+            let ticket = Ticket {
+                _id: document._id.clone(),
+                user_id: document.user_id.clone(),
+                title: document.title.clone(),
+                // description: document.description.clone(),
+                status: document.status.clone(),
+                creation_date: document.creation_date.clone(),
+                update_date: document.update_date.clone(),
+                close_date: document.close_date.clone(),
+                // customer_name: document.customer_name.clone(),
+                // customer_email: document.customer_email.clone(),
+                // customer_phone: document.customer_phone.clone(),
+                // location: document.location.clone(),
+                // quantity: document.quantity.clone(),
+                // price: document.price.clone(),
+                // payment_status: document.payment_status.clone(),
+                // payment_date: document.payment_date.clone(),
+                // payment_method: document.payment_method.clone(),
+            }
+            
+            Ok(Some(ticket))
+        },
+        Ok(None) => {
+            println!("Unable to find a match in collection.");
+            Ok(None)
+        },
+        Err(e) => {
+            println!("Error: {:?}", e); // Handle the error case
+            Err(e)
+        }
+    }
 }
 
 // Checks existence of ticket with id
@@ -326,7 +372,7 @@ pub async fn check_ticket(ticket_id: ObjectId) -> Result<bool, mongodb::error::E
     let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
         .await?;
     let client = Client::with_options(options)?;
-    let ticket_collection: Collection<User> = client.database("tickets").collection("ignotum-tickets");
+    let ticket_collection: Collection<Ticket> = client.database("tickets").collection("ignotum-tickets");
 
     let filter = doc! { "_id": ticket_id };
     // There is also find() that returns all records / documents
