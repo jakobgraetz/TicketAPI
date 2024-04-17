@@ -130,7 +130,7 @@ pub async fn insert_user_document(first_name: String, last_name: String, email: 
 }
 
 // description: String, customer_name: String, customer_email: String, customer_phone: String, location: String, quantity: usize, price: usize, payment_status: String, payment_date: String, payment_method: String
-pub async fn insert_ticket_document(user_id: ObjectId(), title: String, status: String, creation_date: String, update_date: String, close_date: String) -> Result<InsertOneResult, mongodb::error::Error> {
+pub async fn insert_ticket_document(user_id: ObjectId, title: String, status: String, creation_date: String, update_date: String, close_date: String) -> Result<InsertOneResult, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -143,8 +143,8 @@ pub async fn insert_ticket_document(user_id: ObjectId(), title: String, status: 
     let ticket_document = Ticket {
         _id: ObjectId::new(),
         user_id: user_id, 
-        // title: title, 
-        description: description, 
+        title: title, 
+        // description: description, 
         status: status, 
         creation_date: creation_date, 
         update_date: update_date,
@@ -322,7 +322,7 @@ pub async fn get_ticket_data(user_id: ObjectId, ticket_id: ObjectId) -> Result<O
     let client = Client::with_options(options)?;
     let ticket_collection: Collection<Ticket> = client.database("tickets").collection("ignotum-tickets");
 
-    let filter = doc! { "_id": ticket_id, "ticket_id": ticket_id };
+    let filter = doc! { "_id": ticket_id, "user_id": user_id };
     // There is also find() that returns all records / documents
     let result = ticket_collection.find_one(filter, None).await;
     
@@ -347,7 +347,7 @@ pub async fn get_ticket_data(user_id: ObjectId, ticket_id: ObjectId) -> Result<O
                 // payment_status: document.payment_status.clone(),
                 // payment_date: document.payment_date.clone(),
                 // payment_method: document.payment_method.clone(),
-            }
+            };
             
             Ok(Some(ticket))
         },
