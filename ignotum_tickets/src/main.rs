@@ -12,11 +12,10 @@ mod api_utils;
 mod auth_utils;
 
 #[get("/dashboard")]
-fn index() -> Template {
+fn dashboard() -> Template {
     Template::render("dashboard", context!{ field: "value" })
 }
 
-// THIS CANNOT; AND I REPEAT: CANNOT; BE DELETED IN ANY WAY SHAPE OR FORM!!!!!!
 #[tokio::main]
 async fn main() {
     let _ = db_handler::delete_user("jane.doe@example.com".to_string()).await;
@@ -37,5 +36,9 @@ async fn main() {
     // JUST FOR TESTING NOW; MAYBE WILL USE THOSE VALUES IN FUTURE
     // let _ = db_handler::insert_user_document().await;
     // let _ = db_handler::insert_ticket_document().await;
-    rocket::build().attach(Template::fairing());
+    rocket::build()
+        .mount("/", routes![dashboard]) // Mount your routes
+        .attach(Template::fairing()) // Attach fairing for templates
+        .launch() // Start the Rocket server
+        .await; // Await the server to start
 }
