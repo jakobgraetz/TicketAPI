@@ -8,5 +8,7 @@
 </head>
 <body>
     <h1>Dashboard</h1>
+    <p>This is the dashboard page of Ignotum Tickets.</p>
+    <a target="_blank" href="ignotum.vercel.app">Ignotum, Inc.</a>
 </body>
 </html>
