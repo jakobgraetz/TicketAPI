@@ -5,9 +5,16 @@
 * @description Main Rust file for backend.
 */
 
+#[macro_use] extern crate rocket;
+use rocket_dyn_templates::{Template, context};
 mod db_handler;
 mod api_utils;
 mod auth_utils;
+
+#[get("/dashboard")]
+fn index() -> Template {
+    Template::render("dashboard", context!{ field: "value" })
+}
 
 // THIS CANNOT; AND I REPEAT: CANNOT; BE DELETED IN ANY WAY SHAPE OR FORM!!!!!!
 #[tokio::main]
@@ -30,4 +37,5 @@ async fn main() {
     // JUST FOR TESTING NOW; MAYBE WILL USE THOSE VALUES IN FUTURE
     // let _ = db_handler::insert_user_document().await;
     // let _ = db_handler::insert_ticket_document().await;
+    rocket::build().attach(Template::fairing());
 }
