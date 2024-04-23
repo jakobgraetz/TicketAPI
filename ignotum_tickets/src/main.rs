@@ -39,6 +39,7 @@ async fn main() {
     // let _ = db_handler::insert_ticket_document().await;
     */
     rocket::build()
+        .configure(rocket::Config::figment().merge(("port", 1234)))
         .mount("/", routes![dashboard]) // Mount your routes
         .attach(Template::fairing()) // Attach fairing for templates
         .launch() // Start the Rocket server
