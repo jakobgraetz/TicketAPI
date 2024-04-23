@@ -18,6 +18,7 @@ fn dashboard() -> Template {
 
 #[tokio::main]
 async fn main() {
+    /*
     let _ = db_handler::delete_user("jane.doe@example.com".to_string()).await;
     println!("{:?}", db_handler::get_user_data("john.doe@example.com".to_string()).await);
     let hash_tuple = auth_utils::hash_string("A quick brown fox jumps over the lazy frog. 123456789!?".to_string()).unwrap();
@@ -36,6 +37,7 @@ async fn main() {
     // JUST FOR TESTING NOW; MAYBE WILL USE THOSE VALUES IN FUTURE
     // let _ = db_handler::insert_user_document().await;
     // let _ = db_handler::insert_ticket_document().await;
+    */
     rocket::build()
         .mount("/", routes![dashboard]) // Mount your routes
         .attach(Template::fairing()) // Attach fairing for templates
