@@ -16,12 +16,63 @@ fn dashboard() -> Template {
     Template::render("dashboard", context!{ field: "value" })
 }
 
+/*
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(crate = "rocket::serde")]
+pub struct User {
+    _id: ObjectId,
+    first_name: String,
+    last_name: String,
+    email: String,
+    api_key_hash: String,
+    user_password_hash: String,
+    salt:  String,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct Ticket {
+    _id: ObjectId,
+    user_id: ObjectId,
+    title: String,
+    status: String,
+    creation_date: String,
+    update_date: String,
+    close_date: String,
+}
+*/
+
 // route: /api/v1/
 // create-ticket
 // get-ticket
 // check-ticket
 // delete-ticket
 // update-ticket
+
+#[get("/create-ticket")]
+fn api_create_ticket() -> &str {
+    "CREATE TICKET"
+}
+
+#[get("/get-ticket")]
+fn api_get_ticket() -> &str{
+    "GET TICKET"
+}
+
+#[get("/delete-ticket")]
+fn api_delete_ticket() -> &str{
+    "DELETE TICKET"
+}
+
+#[get("/update-ticket")]
+fn api_update_ticket() -> &str {
+    "UPDATE TICKET"
+}
+
+#[get("/check-ticket")]
+fn api_check_ticket() -> &str {
+    "CHECK TICKET"
+}
 
 #[tokio::main]
 async fn main() {
@@ -48,6 +99,7 @@ async fn main() {
     rocket::build()
         .configure(rocket::Config::figment().merge(("port", 1234)))
         .mount("/", routes![dashboard]) // Mount your routes
+        .mount("/api/v1/", routes![api_create_ticket, api_get_ticket, api_delete_ticket, api_update_ticket, api_check_ticket])
         .attach(Template::fairing()) // Attach fairing for templates
         .launch() // Start the Rocket server
         .await; // Await the server to start
