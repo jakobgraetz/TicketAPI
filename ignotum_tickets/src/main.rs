@@ -16,6 +16,13 @@ fn dashboard() -> Template {
     Template::render("dashboard", context!{ field: "value" })
 }
 
+// route: /api/v1/
+// create-ticket
+// get-ticket
+// check-ticket
+// delete-ticket
+// update-ticket
+
 #[tokio::main]
 async fn main() {
     /*
