@@ -7,6 +7,10 @@
 
 #[macro_use] extern crate rocket;
 use rocket_dyn_templates::{Template, context};
+use rocket::Outcome;
+use rocket::http::Status;
+use rocket::request::{self, Request, FromRequest};
+
 mod db_handler;
 mod api_utils;
 mod auth_utils;
