@@ -50,27 +50,27 @@ pub struct Ticket {
 // update-ticket
 
 #[get("/create-ticket")]
-fn api_create_ticket() -> &str {
+fn api_create_ticket() -> &'static str {
     "CREATE TICKET"
 }
 
 #[get("/get-ticket")]
-fn api_get_ticket() -> &str{
+fn api_get_ticket() -> &'static str{
     "GET TICKET"
 }
 
 #[get("/delete-ticket")]
-fn api_delete_ticket() -> &str{
+fn api_delete_ticket() -> &'static str{
     "DELETE TICKET"
 }
 
 #[get("/update-ticket")]
-fn api_update_ticket() -> &str {
+fn api_update_ticket() -> &'static str {
     "UPDATE TICKET"
 }
 
 #[get("/check-ticket")]
-fn api_check_ticket() -> &str {
+fn api_check_ticket() -> &'static str {
     "CHECK TICKET"
 }
 
