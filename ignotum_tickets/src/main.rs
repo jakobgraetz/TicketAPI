@@ -53,6 +53,9 @@ pub struct Ticket {
 // delete-ticket
 // update-ticket
 
+// Creates a new ticket for the user.
+// Future: Updates the user ticket / payment count.
+// Returns json for a ticket id, and a qr code for the ticket.
 #[get("/create-ticket")]
 fn api_create_ticket() -> &'static str {
     "CREATE TICKET"
