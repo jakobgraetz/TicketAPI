@@ -38,6 +38,9 @@ pub struct User {
     api_key_hash: String,
     user_password_hash: String,
     salt:  String,
+    total_requests_count: i128,
+    month_requests_count: i128,
+
     // More user info: payment, ...
 }
 
@@ -97,7 +100,7 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
 }
 */
 
-pub async fn insert_user_document(first_name: String, last_name: String, email: String, api_key_hash: String, user_password_hash: String, salt: String) -> Result<InsertOneResult, mongodb::error::Error> {
+pub async fn insert_user_document(first_name: String, last_name: String, email: String, api_key_hash: String, user_password_hash: String, salt: String, total_requests_count: i128, month_requests_count: i128) -> Result<InsertOneResult, mongodb::error::Error> {
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -115,6 +118,8 @@ pub async fn insert_user_document(first_name: String, last_name: String, email: 
         api_key_hash: api_key_hash, 
         user_password_hash: user_password_hash,
         salt: salt,
+        total_requests_count: total_requests_count,
+        month_requests_count: month_requests_count,
     };
 
     match user_collection.insert_one(user_document, None).await {
@@ -296,6 +301,8 @@ pub async fn get_user_data(email: String) -> Result<Option<User>, mongodb::error
                 api_key_hash: document.api_key_hash.clone(),
                 user_password_hash: document.user_password_hash.clone(),
                 salt: document.salt.clone(),
+                total_requests_count: document.total_requests_count.clone(),
+                month_requests_count: document.month_requests_count.clone(),
             };
             
             Ok(Some(user))
