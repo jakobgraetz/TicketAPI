@@ -55,27 +55,34 @@ pub struct Ticket {
 
 // Creates a new ticket for the user.
 // Future: Updates the user ticket / payment count.
-// Returns json for a ticket id, and a qr code for the ticket.
+// Returns json for a ticket id, and a qr code for the ticket and / or status code.
 #[get("/create-ticket")]
 fn api_create_ticket() -> &'static str {
     "CREATE TICKET"
 }
 
+// Returns json for a ticket with a given id and / or status code.
 #[get("/get-ticket")]
 fn api_get_ticket() -> &'static str {
     "GET TICKET"
 }
 
+// Deletes ticket with given id.
+// Returns status code.
 #[get("/delete-ticket")]
 fn api_delete_ticket() -> &'static str {
     "DELETE TICKET"
 }
 
+// Updates ticket with given id.
+// Returns status code.
 #[get("/update-ticket")]
 fn api_update_ticket() -> &'static str {
     "UPDATE TICKET"
 }
 
+// Checks if a ticket with id / with qr code is valid.
+// Returns bool and / or status code.
 #[get("/check-ticket")]
 fn api_check_ticket() -> &'static str {
     "CHECK TICKET"
