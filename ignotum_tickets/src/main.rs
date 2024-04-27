@@ -59,12 +59,12 @@ fn api_create_ticket() -> &'static str {
 }
 
 #[get("/get-ticket")]
-fn api_get_ticket() -> &'static str{
+fn api_get_ticket() -> &'static str {
     "GET TICKET"
 }
 
 #[get("/delete-ticket")]
-fn api_delete_ticket() -> &'static str{
+fn api_delete_ticket() -> &'static str {
     "DELETE TICKET"
 }
 
