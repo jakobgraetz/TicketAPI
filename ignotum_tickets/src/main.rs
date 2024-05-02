@@ -55,6 +55,7 @@ pub struct Ticket {
 // Creates a new ticket for the user.
 // Future: Updates the user ticket / payment count.
 // Returns json for a ticket id, and a qr code for the ticket and / or status code.
+// needs API key
 #[get("/create-ticket")]
 fn api_create_ticket() -> &'static str {
     "CREATE TICKET"
@@ -68,6 +69,7 @@ fn api_get_ticket(ticket_id: &str) -> String {
 
 // Deletes ticket with given id.
 // Returns status code.
+// needs API key
 #[get("/delete-ticket/<ticket_id>")]
 fn api_delete_ticket(ticket_id: &str) -> String {
     format!("DELETE TICKET {ticket_id}")
@@ -75,6 +77,7 @@ fn api_delete_ticket(ticket_id: &str) -> String {
 
 // Updates ticket with given id.
 // Returns status code.
+// needs API key
 #[get("/update-ticket/<ticket_id>")]
 fn api_update_ticket(ticket_id: &str) -> String {
     format!("UPDATE TICKET {ticket_id}")
@@ -82,6 +85,7 @@ fn api_update_ticket(ticket_id: &str) -> String {
 
 // Checks if a ticket with id / with qr code is valid.
 // Returns bool and / or status code.
+// doesn't necessarily need API key, though might be better, idk
 #[get("/check-ticket/<ticket_id>")]
 fn api_check_ticket(ticket_id: &str) -> String {
     format!("CHECK TICKET {ticket_id}")
