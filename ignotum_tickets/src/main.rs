@@ -86,6 +86,7 @@ fn api_update_ticket(ticket_id: &str) -> String {
 // Checks if a ticket with id / with qr code is valid.
 // Returns bool and / or status code.
 // doesn't necessarily need API key, though might be better, idk
+// as of may 2nd 2024, 20:21 CEST: will be key protected to avoid "DDOS"
 #[get("/check-ticket/<ticket_id>")]
 fn api_check_ticket(ticket_id: &str) -> String {
     format!("CHECK TICKET {ticket_id}")
