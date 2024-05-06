@@ -94,10 +94,6 @@ fn api_check_ticket(ticket_id: &str) -> String {
 
 #[tokio::main]
 async fn main() {
-    let VERSION_STR = "v0.0.1";
-    let EDITION_STR = "Edition 05/05/2024";
-    println!("Initializing Ignotum {:?} with {:?}", VERSION_STR, EDITION_STR);
-
     rocket::build()
         .configure(rocket::Config::figment().merge(("port", 1234)))
         .mount("/", routes![dashboard]) // Mount your routes
