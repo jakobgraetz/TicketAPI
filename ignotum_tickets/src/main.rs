@@ -289,51 +289,54 @@ pub struct Ticket {
 // Future: Updates the user ticket / payment count.
 // Returns json for a ticket id, and a qr code for the ticket and / or status code.
 // needs API key
-#[get("/create-ticket")]
+
+// Create a ticket (POST request)
+#[post("/ticket")]
 fn api_create_ticket(_key: ApiKey) -> &'static str {
     "CREATE TICKET"
 }
 
+// Retrieve a ticket by its ID (GET request)
 // Returns json for a ticket with a given id and / or status code.
-#[get("/get-ticket/<ticket_id>")]
+#[get("/ticket/<ticket_id>")]
 fn api_get_ticket(ticket_id: &str, _key: ApiKey) -> String {
     format!("GET TICKET {ticket_id}")
 }
 
-// Deletes ticket with given id.
+// Delete a ticket by its ID (DELETE request)
 // Returns status code.
 // needs API key
-#[get("/delete-ticket/<ticket_id>")]
+#[delete("/ticket/<ticket_id>")]
 fn api_delete_ticket(ticket_id: &str, _key: ApiKey) -> String {
     format!("DELETE TICKET {ticket_id}")
 }
 
-// Updates ticket with given id.
+
+// Update a ticket by its ID (PUT request)
 // Returns status code.
 // needs API key
-#[get("/update-ticket/<ticket_id>")]
+#[put("/ticket/<ticket_id>")]
 fn api_update_ticket(ticket_id: &str, _key: ApiKey) -> String {
     format!("UPDATE TICKET {ticket_id}")
 }
 
-// Checks if a ticket with id / with qr code is valid.
+// Check if a ticket is valid by its ID (GET request)
 // Returns bool and / or status code.
 // doesn't necessarily need API key, though might be better, idk
 // as of may 2nd 2024, 20:21 CEST: will be key protected to avoid "DDOS"
-#[get("/check-ticket/<ticket_id>")]
+#[get("/ticket/check/<ticket_id>")]
 fn api_check_ticket(ticket_id: &str, _key: ApiKey) -> String {
     format!("CHECK TICKET {ticket_id}")
 }
 
-// Generates and returns a QR-code for a given ticket id. 
+// Generate and return a QR code for a ticket by its ID (GET request)
 // Useful for example if you want to give your customer a
 // document they can provide.
-#[get("/get-ticket-qr/<ticket_id>")]
+#[get("/ticket/qr/<ticket_id>")]
 fn api_get_ticket_qr(ticket_id: &str, _key: ApiKey) -> String {
-    format!("CHECK TICKET {ticket_id}")
+    format!("GET TICKET QR {ticket_id}")
 }
 
-// TODO:
 // Ticket Document Route
 // FUNCTIONALITY
 
