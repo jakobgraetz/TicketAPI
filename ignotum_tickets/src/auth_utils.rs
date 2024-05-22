@@ -79,5 +79,6 @@ pub fn generate_api_key() -> String {
             key.push(random_char);
         }
     }
-    return key;
+    
+    key
 }

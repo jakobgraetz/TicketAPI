@@ -3,6 +3,8 @@
       "dlahmad.dracula-for-rust-theme",
       "wayou.vscode-todo-highlight",
       "tamasfe.even-better-toml",
-      "github.vscode-pull-request-github"
+      "github.vscode-pull-request-github",
+      "karunamurti.tera",
+      "rust-lang.rust-analyzer"
     ]
   }

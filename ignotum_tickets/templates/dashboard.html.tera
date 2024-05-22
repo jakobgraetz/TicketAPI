@@ -4,16 +4,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ignotum Ticket API Dashboard</title>
+    <title>Ignotum API Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/main.js"></script>
 </head>
 <body>
     <h1>Dashboard</h1>
     <p>This is the dashboard page of Ignotum Tickets.</p>
     <a target="_blank" href="https://www.ignotum.vercel.app">Ignotum, Inc.</a>
-    <style>
-        * {
-            font-family: ui-sans-serif, system-ui,sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-        }
-    </style>
 </body>
 </html>

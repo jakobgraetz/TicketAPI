@@ -22,26 +22,30 @@ extern crate serde;
 extern crate serde_json;
 use rocket::{serde::{Deserialize, Serialize}};
 use mongodb::Collection;
-use mongodb::results::InsertOneResult;
 use bson::doc;
 
 // define the way a db must look here, in the code, as MongoDB doesn't enforce a schema (NoSQL)
+// Organization / Team features might be great here
 // user db - not final in this form
+// does not need credit card info, we use stripe
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(crate = "rocket::serde")]
 pub struct User {
     _id: ObjectId,
     first_name: String,
     last_name: String,
-    // Organization / Team features might be great here
     email: String,
     api_key_hash: String,
-    user_password_hash: String,
-    salt:  String,
-    total_requests_count: i128,
-    month_requests_count: i128,
-
-    // More user info: payment, ...
+    api_key_salt: String,
+    password_hash: String,
+    password_salt:  String,
+    month_requests_count: i32,
+    phone_number: String, //optional
+    company: String,      //optional
+    address: String,      //optional
+    api_limit: i32,    
+    date_time_joined: String,
+    subscription_type: String,
 }
 
 // not final
@@ -49,26 +53,239 @@ pub struct User {
 #[serde(crate = "rocket::serde")]
 pub struct Ticket {
     _id: ObjectId,
-    // event_id: ObjectId,
-    // This is the id of the user who created the ticket, necessary so we can keep track of who
-    // issued what tickets, billing, ...
     user_id: ObjectId,
     title: String,
-    // description: String,
+    ticket_type: String,
+    ticket_use_count: i32,
+    max_ticket_uses: i32,
+    description: String,
     status: String,
     creation_date: String,
     update_date: String,
     close_date: String,
-    // customer_name: String,
-    // customer_email: String,
-    // customer_phone: String,
-    // location: String,
-    // quantity: usize,
-    // price: usize,
-    // Maybe bool in future.
-    // payment_status: String,
-    // payment_date: String,
-    // payment_method: String,
+    // optional
+    ticket_holder_first_name: String,
+    ticket_holder_last_name: String,
+    ticket_holder_email: String,
+}
+
+// Calls to this fn will provide empty strings for optional fields!
+pub async fn add_user(first_name: String, last_name: String, email: String, api_key_hash: String, api_key_salt: String, password_hash: String, password_salt: String, phone_number: String, company: String, address: String, api_limit: i32, date_time_joined: String, subscription_type: String) -> Result<String, mongodb::error::Error> {
+    /*
+        _id: ObjectId,
+        first_name: String,
+        last_name: String,
+        email: String,
+        api_key_hash: String,
+        api_key_salt: String,
+        password_hash: String,
+        password_salt:  String,
+        month_requests_count: i128,
+        phone_number: String, //optional
+        company: String,      //optional
+        address: String,      //optional
+        api_limit: i128,
+        date_time_joined: String,
+        subscription_type: String,
+    */
+
+    // Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare()).await?;
+    let client = Client::with_options(options)?;
+    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
+
+    let user_document = User {
+        _id: ObjectId::new(),
+        first_name, 
+        last_name, 
+        email,
+        api_key_hash, 
+        api_key_salt,
+        password_hash,
+        password_salt,
+        month_requests_count: 0,
+        phone_number, //optional - calls to this fn will provide empty strings if not needed
+        company,           //optional - calls to this fn will provide empty strings if not needed
+        address,           //optional - calls to this fn will provide empty strings if not needed
+        api_limit,
+        date_time_joined,
+        subscription_type,
+    };
+
+    match user_collection.insert_one(user_document, None).await {
+        Ok(insert_one_result) => {
+            println!("Inserted doc with id: {}", insert_one_result.inserted_id);
+            Ok(insert_one_result.inserted_id.to_string())
+        },
+        Err(e) => {
+            println!("Error inserting document: {}", e);
+            Err(e)
+        }
+    }
+}
+
+// Returns all data for user with given email.
+pub async fn get_user_data(email: String) -> Result<Option<User>, mongodb::error::Error> {
+    // Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
+        .await?;
+    let client = Client::with_options(options)?;
+    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
+
+    let filter = doc! { "email": email };
+    // There is also find() that returns all records / documents
+    let result = user_collection.find_one(filter, None).await;
+    
+    match result {
+        Ok(Some(ref document)) => {
+            let user =  User {
+                _id: document._id, 
+                first_name: document.first_name.clone(), 
+                last_name: document.last_name.clone(), 
+                email: document.email.clone(),
+                api_key_hash: document.api_key_hash.clone(), 
+                api_key_salt: document.api_key_salt.clone(),
+                password_hash: document.password_hash.clone(),
+                password_salt: document.password_salt.clone(),
+                month_requests_count: document.month_requests_count,
+                phone_number: document.phone_number.clone(), //optional - calls to this fn will provide empty strings if not needed
+                company: document.company.clone(),           //optional - calls to this fn will provide empty strings if not needed
+                address: document.address.clone(),           //optional - calls to this fn will provide empty strings if not needed
+                api_limit: document.api_limit,
+                date_time_joined: document.date_time_joined.clone(),
+                subscription_type: document.subscription_type.clone(),
+            };
+            
+            Ok(Some(user))
+        },
+        Ok(None) => {
+            println!("Unable to find a match in collection.");
+            Ok(None)
+        },
+        Err(e) => {
+            println!("Error: {:?}", e); // Handle the error case
+            Err(e)
+        }
+    }
+}
+
+pub async fn get_user_id(email: &String) -> Result<Option<String>, mongodb::error::Error> {
+    // Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
+        .await?;
+    let client = Client::with_options(options)?;
+    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
+
+    let filter = doc! { "email": email };
+    // There is also find() that returns all records / documents
+    let result = user_collection.find_one(filter, None).await;
+
+    match result {
+        Ok(Some(ref document)) => {
+            println!("Found a match in collection.");
+            Ok(Some(document._id.to_hex()))
+        },
+        Err(e) => {
+            println!("Error: {:?}", e); // Handle the error case
+            Err(e)
+        },
+        _ => {
+            Ok(None)
+        },
+    }
+}
+
+pub async fn check_user(id: String) -> Result<bool, mongodb::error::Error> {
+    // Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
+        .await?;
+    let client = Client::with_options(options)?;
+    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
+
+    // This is how an ObjectId is "created" from a String.
+    let oid = match ObjectId::parse_str(&id) {
+        Ok(oid) => oid,
+        Err(e) => {
+            println!("Error parsing ObjectId: {:?}", e);
+            return Ok(false);
+        }
+    };
+
+    let filter = doc! { "_id": oid };
+    // There is also find() that returns all records / documents
+    let result = user_collection.find_one(filter, None).await;
+
+    match result {
+        Ok(Some(ref _document)) => {
+            println!("Found a match in collection.");
+            Ok(true)
+        },
+        Err(e) => {
+            println!("Error: {:?}", e); // Handle the error case
+            Err(e)
+        },
+        _ => {
+            Ok(false)
+        },
+    }
+}
+
+pub async fn get_user_auth_data(email: &String) -> Result<(String, String), mongodb::error::Error> {
+    // Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
+        .await?;
+    let client = Client::with_options(options)?;
+    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
+
+    let filter = doc! { "email": email };
+    // There is also find() that returns all records / documents
+    let result = user_collection.find_one(filter, None).await;
+
+    match result {
+        Ok(Some(ref document)) => {
+            println!("Found a match in collection.");
+            Ok((document.password_hash.to_string(), document.password_salt.to_string()))
+        },
+        Err(e) => {
+            println!("Error: {:?}", e); // Handle the error case
+            Err(e)
+        },
+        _ => {
+            Ok(("error".to_string(), "error".to_string()))
+        },
+    }
+}
+
+pub async fn delete_user(email: String) -> Result<(), mongodb::error::Error> {
+    // Load the MongoDB connection string from an environment variable:
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    // A Client is needed to connect to MongoDB:
+    // An extra line of code to work around a DNS issue on Windows:
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
+        .await?;
+    let client = Client::with_options(options)?;
+    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
+
+    let filter = doc! { "email": email };
+
+    let result = user_collection.delete_one(filter, None).await?;
+    println!("Deleted {:?} documents.", result.deleted_count);
+    Ok(())
 }
 
 /*
@@ -99,43 +316,31 @@ pub async fn test_db() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 */
+/*
+pub async fn insert_ticket_document(user_id: ObjectId, title: String, ticket_type: String, ticket_use_count: i128, max_ticket_uses: i128, description: String, status: String, creation_date: String, update_date: String, close_date: String, ticket_holder_first_name: String, ticket_holder_last_name: String, ticket_holder_email: String,) -> Result<String, mongodb::error::Error> {
+    /*
+    // not final
+    #[derive(Serialize, Deserialize)]
+    #[serde(crate = "rocket::serde")]
+    pub struct Ticket {
+        _id: ObjectId,
+        user_id: ObjectId,
+        title: String,
+        ticket_type: String,
+        ticket_use_count: i128,
+        max_ticket_uses: i128,
+        description: String,
+        status: String,
+        creation_date: String,
+        update_date: String,
+        close_date: String,
 
-pub async fn insert_user_document(first_name: String, last_name: String, email: String, api_key_hash: String, user_password_hash: String, salt: String, total_requests_count: i128, month_requests_count: i128) -> Result<InsertOneResult, mongodb::error::Error> {
-    // Load the MongoDB connection string from an environment variable:
-    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
-    // A Client is needed to connect to MongoDB:
-    // An extra line of code to work around a DNS issue on Windows:
-    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
-        .await?;
-    let client = Client::with_options(options)?;
-    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
-
-    let user_document = User {
-        _id: ObjectId::new(), 
-        first_name: first_name, 
-        last_name: last_name, 
-        email: email, 
-        api_key_hash: api_key_hash, 
-        user_password_hash: user_password_hash,
-        salt: salt,
-        total_requests_count: total_requests_count,
-        month_requests_count: month_requests_count,
-    };
-
-    match user_collection.insert_one(user_document, None).await {
-        Ok(insert_one_result) => {
-            println!("Inserted doc with id: {}", insert_one_result.inserted_id);
-            Ok(insert_one_result)
-        },
-        Err(e) => {
-            println!("Error inserting document: {}", e);
-            Err(e)
-        }
+        // optional
+        ticket_holder_first_name: String,
+        ticket_holder_last_name: String,
+        ticket_holder_email: String,
     }
-}
-
-// description: String, customer_name: String, customer_email: String, customer_phone: String, location: String, quantity: usize, price: usize, payment_status: String, payment_date: String, payment_method: String
-pub async fn insert_ticket_document(user_id: ObjectId, title: String, status: String, creation_date: String, update_date: String, close_date: String) -> Result<InsertOneResult, mongodb::error::Error> {
+    */
     // Load the MongoDB connection string from an environment variable:
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     // A Client is needed to connect to MongoDB:
@@ -147,28 +352,25 @@ pub async fn insert_ticket_document(user_id: ObjectId, title: String, status: St
 
     let ticket_document = Ticket {
         _id: ObjectId::new(),
-        user_id: user_id, 
-        title: title, 
-        // description: description, 
-        status: status, 
-        creation_date: creation_date, 
+        user_id: user_id,
+        title: title,
+        ticket_type: ticket_type,
+        ticket_use_count: ticket_use_count,
+        max_ticket_uses: max_ticket_uses,
+        description: description,
+        status: status,
+        creation_date: creation_date,
         update_date: update_date,
         close_date: close_date,
-        // customer_name: customer_name,
-        // customer_email: customer_email,
-        // customer_phone: customer_phone,
-        // location: location,
-        // quantity: quantity,
-        // price: price,
-        // payment_status: payment_status,
-        // payment_date: payment_date,
-        // payment_method: payment_method
+        ticket_holder_first_name: ticket_holder_first_name,
+        ticket_holder_last_name: ticket_holder_last_name,
+        ticket_holder_email: ticket_holder_email,
     };
 
     match ticket_collection.insert_one(ticket_document, None).await {
         Ok(insert_one_result) => {
             println!("Inserted doc with id: {}", insert_one_result.inserted_id);
-            Ok(insert_one_result)
+            Ok(insert_one_result.inserted_id.to_string())
         },
         Err(e) => {
             println!("Error inserting document: {}", e);
@@ -177,22 +379,7 @@ pub async fn insert_ticket_document(user_id: ObjectId, title: String, status: St
     }
 }
 
-pub async fn delete_user(email: String) -> Result<(), mongodb::error::Error> {
-    // Load the MongoDB connection string from an environment variable:
-    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
-    // A Client is needed to connect to MongoDB:
-    // An extra line of code to work around a DNS issue on Windows:
-    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
-        .await?;
-    let client = Client::with_options(options)?;
-    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
 
-    let filter = doc! { "email": email };
-
-    let result = user_collection.delete_one(filter, None).await?;
-    println!("Deleted {:?} documents.", result.deleted_count);
-    Ok(())
-}
 
 // Will delete ticket with unique id.
 pub async fn delete_ticket(ticket_id: ObjectId) -> Result<(), mongodb::error::Error> {
@@ -246,77 +433,9 @@ pub async fn get_user_id(email: String) -> Result<Option<ObjectId>, mongodb::err
 }
 */
 
-pub async fn check_user(email: String) -> Result<bool, mongodb::error::Error> {
-    // Load the MongoDB connection string from an environment variable:
-    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
-    // A Client is needed to connect to MongoDB:
-    // An extra line of code to work around a DNS issue on Windows:
-    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
-        .await?;
-    let client = Client::with_options(options)?;
-    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
 
-    let filter = doc! { "email": email };
-    // There is also find() that returns all records / documents
-    let result = user_collection.find_one(filter, None).await;
 
-    match result {
-        Ok(Some(ref _document)) => {
-            println!("Found a match in collection.");
-            Ok(true)
-        },
-        Ok(None) => {
-            println!("Unable to find a match in collection.");
-            Ok(false)
-        },
-        Err(e) => {
-            println!("Error: {:?}", e); // Handle the error case
-            Err(e)
-        }
-    }
-}
 
-pub async fn get_user_data(email: String) -> Result<Option<User>, mongodb::error::Error> {
-    // Load the MongoDB connection string from an environment variable:
-    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
-    // A Client is needed to connect to MongoDB:
-    // An extra line of code to work around a DNS issue on Windows:
-    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
-        .await?;
-    let client = Client::with_options(options)?;
-    let user_collection: Collection<User> = client.database("users").collection("ignotum-users");
-
-    let filter = doc! { "email": email };
-    // There is also find() that returns all records / documents
-    let result = user_collection.find_one(filter, None).await;
-    
-    match result {
-        Ok(Some(ref document)) => {
-            let user =  User {
-                // user data
-                _id: document._id.clone(),
-                first_name: document.first_name.clone(),
-                last_name: document.last_name.clone(),
-                email: document.email.clone(),
-                api_key_hash: document.api_key_hash.clone(),
-                user_password_hash: document.user_password_hash.clone(),
-                salt: document.salt.clone(),
-                total_requests_count: document.total_requests_count.clone(),
-                month_requests_count: document.month_requests_count.clone(),
-            };
-            
-            Ok(Some(user))
-        },
-        Ok(None) => {
-            println!("Unable to find a match in collection.");
-            Ok(None)
-        },
-        Err(e) => {
-            println!("Error: {:?}", e); // Handle the error case
-            Err(e)
-        }
-    }
-}
 
 // If the user owns a ticket (though that is not a problem, as each ticket has a unique id) it will return all the ticket data
 pub async fn get_ticket_data(user_id: ObjectId, ticket_id: ObjectId) -> Result<Option<Ticket>, mongodb::error::Error> {
@@ -368,34 +487,4 @@ pub async fn get_ticket_data(user_id: ObjectId, ticket_id: ObjectId) -> Result<O
         }
     }
 }
-
-// Checks existence of ticket with id
-pub async fn check_ticket(ticket_id: ObjectId) -> Result<bool, mongodb::error::Error> {
-    // Load the MongoDB connection string from an environment variable:
-    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
-    // A Client is needed to connect to MongoDB:
-    // An extra line of code to work around a DNS issue on Windows:
-    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
-        .await?;
-    let client = Client::with_options(options)?;
-    let ticket_collection: Collection<Ticket> = client.database("tickets").collection("ignotum-tickets");
-
-    let filter = doc! { "_id": ticket_id };
-    // There is also find() that returns all records / documents
-    let result = ticket_collection.find_one(filter, None).await;
-
-    match result {
-        Ok(Some(ref _document)) => {
-            println!("Found a match in collection.");
-            Ok(true)
-        },
-        Ok(None) => {
-            println!("Unable to find a match in collection.");
-            Ok(false)
-        },
-        Err(e) => {
-            println!("Error: {:?}", e); // Handle the error case
-            Err(e)
-        }
-    }
-}
+*/
