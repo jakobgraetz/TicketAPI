@@ -188,7 +188,7 @@ async fn signup_handler(jar: &CookieJar<'_>, signup: Form<SignupForm>) -> Redire
 
         let (password_hash, password_salt) = auth_utils::hash_string(signup.password.to_string())?;
         
-        let _ = db_handler::add_user(first_name.to_string(), last_name.to_string(), email.to_string(), "".to_string(), "".to_string(), password_hash.to_string(), password_salt.to_string(), phone_number.to_string(), company.to_string(), address.to_string(), 0, formatted_date_time.to_string(), "".to_string()).await;
+        let _ = db_handler::add_user(first_name.to_string(), last_name.to_string(), email.to_string(), "".to_string(), password_hash.to_string(), password_salt.to_string(), phone_number.to_string(), company.to_string(), address.to_string(), 0, formatted_date_time.to_string(), "".to_string()).await;
         match db_handler::get_user_id(email).await.map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err)) {
             Ok(Some(user_id)) => {
                 println!("SignUp User ID: {}", user_id);
@@ -199,7 +199,7 @@ async fn signup_handler(jar: &CookieJar<'_>, signup: Form<SignupForm>) -> Redire
             },
             Err(e) => {
                 eprintln!("{:?}", e);
-            },  
+            },
         }
         
         Ok(())

@@ -35,8 +35,7 @@ pub struct User {
     first_name: String,
     last_name: String,
     email: String,
-    api_key_hash: String,
-    api_key_salt: String,
+    encrypted_api_key: String,
     password_hash: String,
     password_salt:  String,
     month_requests_count: i32,
@@ -70,7 +69,7 @@ pub struct Ticket {
 }
 
 // Calls to this fn will provide empty strings for optional fields!
-pub async fn add_user(first_name: String, last_name: String, email: String, api_key_hash: String, api_key_salt: String, password_hash: String, password_salt: String, phone_number: String, company: String, address: String, api_limit: i32, date_time_joined: String, subscription_type: String) -> Result<String, mongodb::error::Error> {
+pub async fn add_user(first_name: String, last_name: String, email: String, encrypted_api_key: String, password_hash: String, password_salt: String, phone_number: String, company: String, address: String, api_limit: i32, date_time_joined: String, subscription_type: String) -> Result<String, mongodb::error::Error> {
     /*
         _id: ObjectId,
         first_name: String,
@@ -102,8 +101,7 @@ pub async fn add_user(first_name: String, last_name: String, email: String, api_
         first_name, 
         last_name, 
         email,
-        api_key_hash, 
-        api_key_salt,
+        encrypted_api_key,
         password_hash,
         password_salt,
         month_requests_count: 0,
@@ -140,7 +138,7 @@ pub async fn get_user_data(email: String) -> Result<Option<User>, mongodb::error
 
     let filter = doc! { "email": email };
     // There is also find() that returns all records / documents
-    let result = user_collection.find_one(filter, None).await;
+    let result: Result<Option<_>, mongodb::error::Error> = user_collection.find_one(filter, None).await;
     
     match result {
         Ok(Some(ref document)) => {
@@ -149,8 +147,7 @@ pub async fn get_user_data(email: String) -> Result<Option<User>, mongodb::error
                 first_name: document.first_name.clone(), 
                 last_name: document.last_name.clone(), 
                 email: document.email.clone(),
-                api_key_hash: document.api_key_hash.clone(), 
-                api_key_salt: document.api_key_salt.clone(),
+                encrypted_api_key: document.encrypted_api_key.clone(),
                 password_hash: document.password_hash.clone(),
                 password_salt: document.password_salt.clone(),
                 month_requests_count: document.month_requests_count,
