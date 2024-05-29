@@ -346,7 +346,7 @@ async fn main() {
         .configure(rocket::Config::figment().merge(("port", 1234)))
         .mount("/", routes![index_page, dashboard, dashboard_default, signup, signup_default, signup_handler, login, login_default, login_handler, logout, logout_default]) // Mounts routes
         .mount("/api/v1/", routes![api_create_ticket, api_get_ticket, api_delete_ticket, api_update_ticket, api_check_ticket, api_get_ticket_qr])
-        .mount("/static", FileServer::from("../static"))
+        .mount("/static", FileServer::from("./static"))
         .attach(Template::fairing()) // Attach fairing for templates
         .launch() // Start the Rocket server
         .await; // Await the server to start
