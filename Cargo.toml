@@ -1,5 +1,5 @@
 [package]
-name = "ignotum_tickets"
+name = "ignotum-ticketapi"
 version = "0.1.0"
 edition = "2021"
 authors = ["Johannes Schießl","Jakob Grätz"]
