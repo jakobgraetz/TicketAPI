@@ -249,7 +249,8 @@ fn logout_default() -> Redirect {
 
 #[get("/new-api-key")]
 fn new_api_key(jar: &CookieJar<'_>, _session_user: SessionUser) -> String {
-    format!("GET TICKET {ticket_id}")
+    let user_id = jar.get_private("user_id").unwrap();
+    format!("GET api key {user_id}")
 }
 // route: /api/v1/
 // create-ticket
@@ -348,9 +349,9 @@ fn api_get_ticket_qr(ticket_id: &str, _key: ApiKey) -> String {
 async fn main() {
     let _ = rocket::build()
         .configure(rocket::Config::figment().merge(("port", 1234)))
-        .mount("/", routes![index_page, dashboard, dashboard_default, signup, signup_default, signup_handler, login, login_default, login_handler, logout, logout_default]) // Mounts routes
+        .mount("/", routes![index_page, dashboard, dashboard_default, signup, signup_default, signup_handler, login, login_default, login_handler, logout, logout_default, new_api_key]) // Mounts routes
         .mount("/api/v1/", routes![api_create_ticket, api_get_ticket, api_delete_ticket, api_update_ticket, api_check_ticket, api_get_ticket_qr])
-        .mount("/static", FileServer::from("../static"))
+        .mount("/static", FileServer::from("./static"))
         .attach(Template::fairing()) // Attach fairing for templates
         .launch() // Start the Rocket server
         .await; // Await the server to start
