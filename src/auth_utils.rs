@@ -33,6 +33,25 @@ pub fn hash_string (data: String) -> Result<(String, String), argon2::password_h
     Ok((hash, salt.to_string()))
 }
 
+pub fn encrypt_api_key (data: String) -> Result<String, argon2::password_hash::Error> {
+    let salt = match SaltString::from_b64("api-key-encryption-key") {
+        Ok(salt) => salt,
+        Err(err) => panic!("Unexpected behavior when generating SaltString {:?}", err),
+    };
+
+    let argon2 = Argon2::default();
+
+    let data_hash = argon2.hash_password(data.as_bytes(), &salt)?;
+    let encrypted_api_key = match data_hash.hash {
+        Some(h) => h.to_string(),
+        None => "error".to_string(), //TODO: error handling wizardry
+    };
+
+    println!("{:?}", encrypted_api_key);
+
+    Ok(encrypted_api_key)
+}
+
 // @author Jakob Grätz
 // Hashes plain text string and compares it to a given hash
 pub fn check_string (salt: String, plain: String, hash: String) -> Result<bool, argon2::password_hash::Error> {
