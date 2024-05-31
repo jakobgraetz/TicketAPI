@@ -77,7 +77,7 @@ pub fn check_string (salt: String, plain: String, hash: String) -> Result<bool, 
     }
 }
 
-pub fn generate_api_key() -> String {
+pub fn generate_api_key(user_id: String) -> String {
     const KEY_LENGTH: usize = 64;
 
     let mut rng = rand::thread_rng();
@@ -99,5 +99,7 @@ pub fn generate_api_key() -> String {
         }
     }
     
+    key.push_str(&user_id);
+
     key
 }

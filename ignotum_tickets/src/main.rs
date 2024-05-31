@@ -249,9 +249,13 @@ fn logout_default() -> Redirect {
 
 #[get("/new-api-key")]
 fn new_api_key(jar: &CookieJar<'_>, _session_user: SessionUser) -> String {
-    let user_id = jar.get_private("user_id").unwrap();
-    format!("GET api key {user_id}")
+    let user_id = jar.get_private("user_id").map(|cookie| cookie.value().to_string());
+    let now = Utc::now();
+    let formatted_now = now.to_rfc3339_opts(SecondsFormat::Nanos, true);
+    let api_key = auth_utils::generate_api_key(user_id.expect(&formatted_now));
+    format!("api key: {api_key}")
 }
+
 // route: /api/v1/
 // create-ticket
 // get-ticket
