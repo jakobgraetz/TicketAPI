@@ -5,77 +5,8 @@
 * @description Rust file for authentication utilities, like hashing, key gen, ...
 */
 
-extern crate argon2;
-use argon2::{
-    password_hash::{
-        rand_core::OsRng,
-        PasswordHasher, SaltString
-    },
-    Argon2
-};
 use rand::Rng;
 use std::collections::HashSet;
-
-pub fn hash_string (data: String) -> Result<(String, String), argon2::password_hash::Error> {
-    let salt = SaltString::generate(&mut OsRng);
-
-    let argon2 = Argon2::default();
-
-    let data_hash = argon2.hash_password(data.as_bytes(), &salt)?;
-    let hash = match data_hash.hash {
-        Some(h) => h.to_string(),
-        None => "error".to_string(), //TODO: error handling wizardry
-    };
-
-    println!("{:?}", hash);
-    println!("{:?}", salt);
-
-    Ok((hash, salt.to_string()))
-}
-
-pub fn encrypt_api_key (data: String) -> Result<String, argon2::password_hash::Error> {
-    let salt = match SaltString::from_b64("api-key-encryption-key") {
-        Ok(salt) => salt,
-        Err(err) => panic!("Unexpected behavior when generating SaltString {:?}", err),
-    };
-
-    let argon2 = Argon2::default();
-
-    let data_hash = argon2.hash_password(data.as_bytes(), &salt)?;
-    let encrypted_api_key = match data_hash.hash {
-        Some(h) => h.to_string(),
-        None => "error".to_string(), //TODO: error handling wizardry
-    };
-
-    println!("{:?}", encrypted_api_key);
-
-    Ok(encrypted_api_key)
-}
-
-// @author Jakob Grätz
-// Hashes plain text string and compares it to a given hash
-pub fn check_string (salt: String, plain: String, hash: String) -> Result<bool, argon2::password_hash::Error> {
-    let new_salt = match SaltString::from_b64(&salt) {
-        Ok(salt) => salt,
-        Err(err) => panic!("Unexpected behavior when generating SaltString {:?}", err),
-    };
-    
-    let argon2 = Argon2::default();
-
-    let new_hash = argon2.hash_password(plain.as_bytes(), &new_salt)?;
-    let hash_content = match new_hash.hash {
-        Some(h) => h.to_string(),
-        None => "error".to_string(),
-    };
-
-    if hash == hash_content {
-        println!("{:?} = {:?}", hash_content, hash);
-        Ok(true)
-    } else {
-        println!("{:?} != {:?}", hash_content, hash);
-        Ok(false)
-    }
-}
 
 pub fn generate_api_key(user_id: String) -> String {
     const KEY_LENGTH: usize = 64;
