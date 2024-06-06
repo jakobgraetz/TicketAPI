@@ -134,6 +134,14 @@ fn api_create_ticket(_key: ApiKey, ticket: Json<Ticket>) -> String {
     format!("ticket created: {id}")
 }
 
+// Update a ticket by its ID (PUT request)
+// Returns status code.
+// needs API key
+#[put("/ticket/<ticket_id>", format = "application/json", data = "<ticket>")]
+fn api_update_ticket(ticket_id: &str, _key: ApiKey, ticket: Json<Ticket>) -> String {
+    format!("UPDATE TICKET {ticket_id}")
+}
+
 // Retrieve a ticket by its ID (GET request)
 // Returns json for a ticket with a given id and / or status code.
 #[get("/ticket/<ticket_id>")]
@@ -150,13 +158,7 @@ fn api_delete_ticket(ticket_id: &str, _key: ApiKey) -> String {
 }
 
 
-// Update a ticket by its ID (PUT request)
-// Returns status code.
-// needs API key
-#[put("/ticket/<ticket_id>")]
-fn api_update_ticket(ticket_id: &str, _key: ApiKey) -> String {
-    format!("UPDATE TICKET {ticket_id}")
-}
+
 
 // Check if a ticket is valid by its ID (GET request)
 // Returns bool and / or status code.
@@ -166,9 +168,6 @@ fn api_update_ticket(ticket_id: &str, _key: ApiKey) -> String {
 fn api_check_ticket(ticket_id: &str, _key: ApiKey) -> String {
     format!("CHECK TICKET {ticket_id}")
 }
-
-// Ticket Document Route
-// FUNCTIONALITY
 
 #[tokio::main]
 async fn main() {
