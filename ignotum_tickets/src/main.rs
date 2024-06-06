@@ -7,11 +7,11 @@
 
 // Imports.
 #[macro_use] extern crate rocket;
+use bson::oid::ObjectId;
 use rocket::http::Status;
 use rocket::request::{self, Request, FromRequest};
 use rocket::request::Outcome;
-use rocket::fs::FileServer;
-//use rocket::response::Redirect;
+use rocket::serde::{json::Json, Deserialize};
 use chrono::prelude::*;
 
 // Import local modules.
@@ -30,6 +30,19 @@ enum ApiKeyError {
     Invalid   // Error that indicates the API key is incorrect.
 }
 
+#[derive(Debug, Deserialize)]
+struct Ticket {
+    #[serde(rename = "title")]
+    title: String,
+    #[serde(rename = "close_date")]
+    close_date: String,
+    #[serde(rename = "customer_first_name")]
+    customer_first_name: String,
+    #[serde(rename = "customer_last_name")]
+    customer_last_name: String,
+    #[serde(rename = "customer_email")]
+    customer_email: String,
+}
 
 // Implement the conversion trait `FromRequest` for `ApiKey`.
 #[rocket::async_trait]
@@ -63,7 +76,6 @@ fn is_api_key_valid(key: &str) -> bool {
 // check-ticket
 // delete-ticket
 // update-ticket
-// TODO: format: json
 
 /*
 #[derive(Serialize, Deserialize, Debug)]
@@ -88,7 +100,6 @@ pub struct Ticket {
     creation_date: String,
     update_date: String,
     close_date: String,
-    // OPTIONAL; FUTURE:
     customer_first_name: String,
     customer_last_name: String,
     customer_email: String
@@ -101,9 +112,26 @@ pub struct Ticket {
 // needs API key
 
 // Create a ticket (POST request)
-#[post("/ticket")]
-fn api_create_ticket(_key: ApiKey) -> &'static str {
-    "CREATE TICKET"
+#[post("/ticket", format = "application/json", data = "<ticket>")]
+fn api_create_ticket(_key: ApiKey, ticket: Json<Ticket>) -> String {
+    let id = ObjectId::new().to_string();
+
+    println!(
+        "Received ticket: {:?}, {:?}, {:?}, {:?}, {:?}, {:?}",
+        id, ticket.title, ticket.close_date, ticket.customer_first_name,
+        ticket.customer_last_name, ticket.customer_email
+    );
+    /*
+    pub struct Ticket {
+        user_id: ObjectId,
+        title: String,
+        close_date: String,
+        customer_first_name: String,
+        customer_last_name: String,
+        customer_email: String
+    }
+    */
+    format!("ticket created: {id}")
 }
 
 // Retrieve a ticket by its ID (GET request)
