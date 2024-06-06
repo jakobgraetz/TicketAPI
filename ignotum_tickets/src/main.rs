@@ -145,7 +145,7 @@ fn api_check_ticket(ticket_id: &str, _key: ApiKey) -> String {
 #[tokio::main]
 async fn main() {
     let _ = rocket::build()
-        .configure(rocket::Config::figment().merge(("port", 1234)))
+        .configure(rocket::Config::figment().merge(("port", 10000)))
         .mount("/v1/", routes![api_create_ticket, api_get_ticket, api_delete_ticket, api_update_ticket, api_check_ticket])
         .launch() // Start the Rocket server
         .await; // Await the server to start
