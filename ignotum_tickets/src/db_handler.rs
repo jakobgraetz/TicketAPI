@@ -23,11 +23,8 @@ extern crate serde_json;
 use rocket::{serde::{Deserialize, Serialize}};
 use mongodb::Collection;
 use bson::doc;
+use chrono::prelude::*;
 
-// define the way a db must look here, in the code, as MongoDB doesn't enforce a schema (NoSQL)
-// Organization / Team features might be great here
-// user db - not final in this form
-// does not need credit card info, we use stripe
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(crate = "rocket::serde")]
 pub struct User {
@@ -47,59 +44,74 @@ pub struct User {
     subscription_type: String,
 }
 
-// not final
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct Ticket {
     _id: ObjectId,
     user_id: ObjectId,
     title: String,
-    ticket_type: String,
-    ticket_use_count: i32,
-    max_ticket_uses: i32,
     description: String,
     status: String,
     creation_date: String,
     update_date: String,
     close_date: String,
-    // optional
     ticket_holder_first_name: String,
     ticket_holder_last_name: String,
     ticket_holder_email: String,
 }
 
-/*
-pub async fn test_db() -> Result<(), Box<dyn Error>> {
-    // dev, not for production, just so I learn about working with MongoDB.
-    // Load the MongoDB connection string from an environment variable:
+pub async fn get_user_id(api_key: String) -> Result<String, mongodb::error::Error> {
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
-    // A Client is needed to connect to MongoDB:
-    // An extra line of code to work around a DNS issue on Windows:
-    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
-        .await?;
-    let client = Client::with_options(options)?;
-    // Print the databases in our MongoDB cluster:
-    println!("Databases:");
-    for name in client.list_database_names(None, None).await? {
-        println!("- {}", name);
-    }
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare()).await?;
 
-    // each collection needs a struct defined here for the <T> -> mongodb::Collection<T>
-    // for example: struct Movies -> mongodb::Collection<Movies>
-    // Get the 'movies' collection from the 'sample_mflix' database:
-    // let movies = client.database("sample_mflix").collection("movies");
-    // println!("Testing MongoDB's sample mflix database:");
-    // println!("{:?}", movies);
-    // Delete the 'sample_mflix' database
-    // client.database("sample_mflix").drop(None).await?;
-    // println!("Deleted database 'sample_mflix'.");
-    Ok(())
+    let client = Client::with_options(options)?;
+    let ticket_collection: Collection<Ticket> = client.database("users").collection("ignotum-users");
 }
-*/
+
+pub async fn update_request_count(api_key: String) -> Result<(), mongodb::error::Error> {
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare()).await?;
+
+    let client = Client::with_options(options)?;
+    let ticket_collection: Collection<Ticket> = client.database("users").collection("ignotum-users");
+}
+
+pub async fn insert_ticket_doc(user_id: ObjectId, title: String, close_date: String, customer_first_name: String, customer_last_name: String, customer_email: String) -> Result<String, mongodb::error::Error> {
+    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare()).await?;
+
+    let client = Client::with_options(options)?;
+    let ticket_collection: Collection<Ticket> = client.database("tickets").collection("ignotum-tickets");
+
+    let date_as_string = Utc::now().to_string();
+
+    let ticket_document = Ticket {
+        _id: ObjectId::new(),
+        user_id: user_id,
+        title: title,
+        status: "unchecked".to_string(),
+        creation_date: date_as_string,
+        update_date: date_as_string,
+        close_date: close_date,
+        ticket_holder_first_name: customer_first_name,
+        ticket_holder_last_name: customer_last_name,
+        ticket_holder_email: customer_email,
+    };
+
+    match ticket_collection.insert_one(ticket_document, None).await {
+        Ok(insert_one_result) => {
+            println!("Inserted doc with id: {}", insert_one_result.inserted_id);
+            Ok(insert_one_result.inserted_id.to_string())
+        },
+        Err(e) => {
+            println!("Error inserting document: {}", e);
+            Err(e)
+        }
+    }
+}
+
 /*
-pub async fn insert_ticket_document(user_id: ObjectId, title: String, ticket_type: String, ticket_use_count: i128, max_ticket_uses: i128, description: String, status: String, creation_date: String, update_date: String, close_date: String, ticket_holder_first_name: String, ticket_holder_last_name: String, ticket_holder_email: String,) -> Result<String, mongodb::error::Error> {
-    /*
-    // not final
+pub async fn insert_ticket_document(user_id: ObjectId, title: String, ticket_type: String, ticket_use_count: i128, max_ticket_uses: i128, description: String, status: String, creation_date: String, update_date: String, close_date: String, ticket_holder_first_name: String, ticket_holder_last_name: String, ticket_holder_email: String,)  {
     #[derive(Serialize, Deserialize)]
     #[serde(crate = "rocket::serde")]
     pub struct Ticket {
@@ -120,43 +132,16 @@ pub async fn insert_ticket_document(user_id: ObjectId, title: String, ticket_typ
         ticket_holder_last_name: String,
         ticket_holder_email: String,
     }
-    */
     // Load the MongoDB connection string from an environment variable:
-    let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
+    
     // A Client is needed to connect to MongoDB:
     // An extra line of code to work around a DNS issue on Windows:
-    let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare())
-        .await?;
-    let client = Client::with_options(options)?;
-    let ticket_collection: Collection<Ticket> = client.database("tickets").collection("ignotum-tickets");
+    
+    
 
-    let ticket_document = Ticket {
-        _id: ObjectId::new(),
-        user_id: user_id,
-        title: title,
-        ticket_type: ticket_type,
-        ticket_use_count: ticket_use_count,
-        max_ticket_uses: max_ticket_uses,
-        description: description,
-        status: status,
-        creation_date: creation_date,
-        update_date: update_date,
-        close_date: close_date,
-        ticket_holder_first_name: ticket_holder_first_name,
-        ticket_holder_last_name: ticket_holder_last_name,
-        ticket_holder_email: ticket_holder_email,
-    };
+    
 
-    match ticket_collection.insert_one(ticket_document, None).await {
-        Ok(insert_one_result) => {
-            println!("Inserted doc with id: {}", insert_one_result.inserted_id);
-            Ok(insert_one_result.inserted_id.to_string())
-        },
-        Err(e) => {
-            println!("Error inserting document: {}", e);
-            Err(e)
-        }
-    }
+    
 }
 
 

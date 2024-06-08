@@ -114,11 +114,10 @@ pub struct Ticket {
 // Create a ticket (POST request)
 #[post("/ticket", format = "application/json", data = "<ticket>")]
 fn api_create_ticket(_key: ApiKey, ticket: Json<Ticket>) -> String {
-    let id = ObjectId::new().to_string();
 
     println!(
-        "Received ticket: {:?}, {:?}, {:?}, {:?}, {:?}, {:?}",
-        id, ticket.title, ticket.close_date, ticket.customer_first_name,
+        "Received ticket: {:?}, {:?}, {:?}, {:?}, {:?}",
+        ticket.title, ticket.close_date, ticket.customer_first_name,
         ticket.customer_last_name, ticket.customer_email
     );
     /*
