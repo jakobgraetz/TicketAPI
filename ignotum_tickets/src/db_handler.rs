@@ -50,7 +50,6 @@ pub struct Ticket {
     _id: ObjectId,
     user_id: ObjectId,
     title: String,
-    description: String,
     status: String,
     creation_date: String,
     update_date: String,
@@ -59,7 +58,7 @@ pub struct Ticket {
     ticket_holder_last_name: String,
     ticket_holder_email: String,
 }
-
+/*
 pub async fn get_user_id(api_key: String) -> Result<String, mongodb::error::Error> {
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare()).await?;
@@ -74,8 +73,9 @@ pub async fn update_request_count(api_key: String) -> Result<(), mongodb::error:
 
     let client = Client::with_options(options)?;
     let ticket_collection: Collection<Ticket> = client.database("users").collection("ignotum-users");
+    
 }
-
+*/
 pub async fn insert_ticket_doc(user_id: ObjectId, title: String, close_date: String, customer_first_name: String, customer_last_name: String, customer_email: String) -> Result<String, mongodb::error::Error> {
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare()).await?;
@@ -83,15 +83,13 @@ pub async fn insert_ticket_doc(user_id: ObjectId, title: String, close_date: Str
     let client = Client::with_options(options)?;
     let ticket_collection: Collection<Ticket> = client.database("tickets").collection("ignotum-tickets");
 
-    let date_as_string = Utc::now().to_string();
-
     let ticket_document = Ticket {
         _id: ObjectId::new(),
         user_id: user_id,
         title: title,
         status: "unchecked".to_string(),
-        creation_date: date_as_string,
-        update_date: date_as_string,
+        creation_date: Utc::now().to_string(),
+        update_date: Utc::now().to_string(),
         close_date: close_date,
         ticket_holder_first_name: customer_first_name,
         ticket_holder_last_name: customer_last_name,

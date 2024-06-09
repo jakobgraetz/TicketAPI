@@ -12,6 +12,7 @@ use rocket::http::Status;
 use rocket::request::{self, Request, FromRequest};
 use rocket::request::Outcome;
 use rocket::serde::{json::Json, Deserialize};
+use rocket::Catcher;
 use chrono::prelude::*;
 
 // Import local modules.
@@ -113,13 +114,7 @@ pub struct Ticket {
 
 // Create a ticket (POST request)
 #[post("/ticket", format = "application/json", data = "<ticket>")]
-fn api_create_ticket(_key: ApiKey, ticket: Json<Ticket>) -> String {
-
-    println!(
-        "Received ticket: {:?}, {:?}, {:?}, {:?}, {:?}",
-        ticket.title, ticket.close_date, ticket.customer_first_name,
-        ticket.customer_last_name, ticket.customer_email
-    );
+async fn api_create_ticket(_key: ApiKey, ticket: Json<Ticket>) -> String {
     /*
     pub struct Ticket {
         user_id: ObjectId,
@@ -130,7 +125,8 @@ fn api_create_ticket(_key: ApiKey, ticket: Json<Ticket>) -> String {
         customer_email: String
     }
     */
-    format!("ticket created: {id}")
+    db_handler::insert_ticket_doc(ObjectId::new(), ticket.title.clone(), ticket.close_date.clone(), ticket.customer_first_name.clone(), ticket.customer_last_name.clone(), ticket.customer_email.clone()).await;
+    format!("ticket created")
 }
 
 // Update a ticket by its ID (PUT request)
@@ -168,10 +164,51 @@ fn api_check_ticket(ticket_id: &str, _key: ApiKey) -> String {
     format!("CHECK TICKET {ticket_id}")
 }
 
+#[catch(400)]
+fn bad_request() -> &'static str {
+    "Custom 400 - Bad request"
+}
+
+#[catch(401)]
+fn unauthorized() -> &'static str {
+    "Custom 401 - Unauthorized"
+}
+
+#[catch(403)]
+fn forbidden() -> &'static str {
+    "Custom 403 - Forbidden"
+}
+
+#[catch(404)]
+fn not_found() -> &'static str {
+    "Custom 404 - Resource not found"
+}
+
+#[catch(405)]
+fn method_not_allowed() -> &'static str {
+    "Custom 405 - Method not allowed"
+}
+
+#[catch(500)]
+fn internal_error() -> &'static str {
+    "Custom 500 - Internal server error"
+}
+
+#[catch(502)]
+fn bad_gateway() -> &'static str {
+    "Custom 502 - Bad gateway"
+}
+
+#[catch(503)]
+fn service_unavailable() -> &'static str {
+    "Custom 503 - Service unavailable"
+}
+
 #[tokio::main]
 async fn main() {
     let _ = rocket::build()
         .configure(rocket::Config::figment().merge(("port", 10000)))
+        .register("/", catchers![bad_request, unauthorized, forbidden,not_found, method_not_allowed, internal_error, bad_gateway, service_unavailable])
         .mount("/v1/", routes![api_create_ticket, api_get_ticket, api_delete_ticket, api_update_ticket, api_check_ticket])
         .launch() // Start the Rocket server
         .await; // Await the server to start
