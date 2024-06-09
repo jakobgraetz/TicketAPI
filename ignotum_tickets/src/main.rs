@@ -125,8 +125,12 @@ async fn api_create_ticket(_key: ApiKey, ticket: Json<Ticket>) -> String {
         customer_email: String
     }
     */
-    db_handler::insert_ticket_doc(ObjectId::new(), ticket.title.clone(), ticket.close_date.clone(), ticket.customer_first_name.clone(), ticket.customer_last_name.clone(), ticket.customer_email.clone()).await;
-    format!("ticket created")
+    let ticket_id = db_handler::insert_ticket_doc(ObjectId::new(), ticket.title.clone(), ticket.close_date.clone(), ticket.customer_first_name.clone(), ticket.customer_last_name.clone(), ticket.customer_email.clone()).await;
+    
+    match ticket_id {
+        Ok(string_id) => format!("ticket created {string_id}"),
+        Err(e) => format!("error: {e}")
+    }
 }
 
 // Update a ticket by its ID (PUT request)

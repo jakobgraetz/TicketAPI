@@ -59,7 +59,7 @@ pub struct Ticket {
     ticket_holder_email: String,
 }
 
-pub async fn get_user_id(api_key: String) -> Result<Option<ObjectId()>, mongodb::error::Error> {
+pub async fn get_user_id(api_key: String) -> Result<Option<ObjectId>, mongodb::error::Error> {
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare()).await?;
 
@@ -86,16 +86,22 @@ pub async fn get_user_id(api_key: String) -> Result<Option<ObjectId()>, mongodb:
         }
     }
 }
-/*
+
 pub async fn update_request_count(api_key: String) -> Result<(), mongodb::error::Error> {
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare()).await?;
 
     let client = Client::with_options(options)?;
-    let ticket_collection: Collection<Ticket> = client.database("users").collection("ignotum-users");
+    let user_collection: Collection<Ticket> = client.database("users").collection("ignotum-users");
+
+    let filter = doc! {"api_key": api_key};
+    let update = doc! { "$inc": { "request_count": 1 } };
+
+    let _ = user_collection.update_one(filter, update, None).await?;
     
+    Ok(())
 }
-*/
+
 pub async fn insert_ticket_doc(user_id: ObjectId, title: String, close_date: String, customer_first_name: String, customer_last_name: String, customer_email: String) -> Result<String, mongodb::error::Error> {
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare()).await?;
