@@ -58,15 +58,35 @@ pub struct Ticket {
     ticket_holder_last_name: String,
     ticket_holder_email: String,
 }
-/*
-pub async fn get_user_id(api_key: String) -> Result<String, mongodb::error::Error> {
+
+pub async fn get_user_id(api_key: String) -> Result<Option<ObjectId()>, mongodb::error::Error> {
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare()).await?;
 
     let client = Client::with_options(options)?;
-    let ticket_collection: Collection<Ticket> = client.database("users").collection("ignotum-users");
-}
+    let user_collection: Collection<Ticket> = client.database("users").collection("ignotum-users");
 
+    let filter = doc! {"api_key": api_key};
+
+    let result = user_collection.find_one(filter, None).await;
+    
+    match result {
+        Ok(Some(ref document)) => {
+            let user_id =  document._id.clone();
+            println!("user id {:?}", user_id);
+            Ok(Some(user_id))
+        },
+        Ok(None) => {
+            println!("Unable to find a match in collection.");
+            Ok(None)
+        },
+        Err(e) => {
+            println!("Error: {:?}", e); // Handle the error case
+            Err(e)
+        }
+    }
+}
+/*
 pub async fn update_request_count(api_key: String) -> Result<(), mongodb::error::Error> {
     let client_uri = env::var("MONGODB_URI").expect("You must set the MONGODB_URI environment var!");
     let options = ClientOptions::parse_with_resolver_config(&client_uri, ResolverConfig::cloudflare()).await?;

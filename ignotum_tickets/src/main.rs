@@ -164,6 +164,7 @@ fn api_check_ticket(ticket_id: &str, _key: ApiKey) -> String {
     format!("CHECK TICKET {ticket_id}")
 }
 
+// HTTP Error Handlers and Catchers
 #[catch(400)]
 fn bad_request() -> &'static str {
     "Custom 400 - Bad request"
