@@ -1,14 +1,6 @@
-/*
-* @author Jakob Grätz, Johannes Schießl | @jakobgraetz, @johannesschiessl
-* @edition 23/04/2024 DD/MM/YYYY
-* @version v0.0.1
-* @description Rust file responsible for handling MongoDB (atlas) connection and databases.
-* @note The allowed IP in the Atlas Web / DB deployment may needs to be adjusted based on the server or rather, client, IP ... also export MONGODB_URI env var
-
-Some good docs for Rust MongoDB:
-https://mongodb.github.io/mongo-rust-driver/manual/reading.html
-https://taharmeijs.medium.com/beginners-guide-to-mongodb-and-rust-8d8d3ef17920
-*/
+// @author Jakob Grätz, Johannes Schießl
+// @date 05/07/2024 (DD/MM/YYYY)
+// @version v0.0.2
 
 // Imports
 use mongodb::{Client, options::{ClientOptions, ResolverConfig}, bson::oid::ObjectId};
@@ -67,7 +59,7 @@ pub async fn get_user_id(api_key: String) -> Result<Option<ObjectId>, mongodb::e
     
     match result {
         Ok(Some(ref document)) => {
-            let user_id =  document._id.clone();
+            let user_id =  document._id;
             println!("user id {:?}", user_id);
             Ok(Some(user_id))
         },

@@ -4,7 +4,7 @@
 * @version v0.0.1
 * @description Rust file for api utilities.
 */
-
+/* 
 // DEPENDENCIES
 extern crate chrono;
 
@@ -24,3 +24,4 @@ pub fn is_date_in_future(date_str: &str) -> bool {
         Err(_) => false,
     }
 }
+*/
