@@ -3,14 +3,10 @@
 // @version v0.0.2
 
 #[macro_use] extern crate rocket;
-use bson::oid::ObjectId;
 use rocket::http::Status;
 use rocket::request::{self, Request, FromRequest};
 use rocket::request::Outcome;
 use rocket::serde::{json::Json, Serialize, Deserialize};
-
-mod db_handler;
-mod api_utils;
 
 struct ApiKey(String);
 
@@ -31,16 +27,6 @@ enum ApiKeyError {
 
 #[derive(Debug, Deserialize)]
 struct Ticket {
-    #[serde(rename = "title")]
-    title: String,
-    #[serde(rename = "close_date")]
-    close_date: String,
-    #[serde(rename = "customer_first_name")]
-    customer_first_name: String,
-    #[serde(rename = "customer_last_name")]
-    customer_last_name: String,
-    #[serde(rename = "customer_email")]
-    customer_email: String,
 }
 
 #[rocket::async_trait]
@@ -68,54 +54,11 @@ fn update_usage() {
     println!("Updating Usage for user.")
 }
 
-/*
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(crate = "rocket::serde")]
-pub struct User {
-    _id: ObjectId,
-    first_name: String,
-    last_name: String,
-    email: String,
-    api_key_hash: String,
-    user_password_hash: String,
-    salt:  String,
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
-pub struct Ticket {
-    _id: ObjectId,
-    user_id: ObjectId,
-    title: String,
-    status: String,
-    creation_date: String,
-    update_date: String,
-    close_date: String,
-    customer_first_name: String,
-    customer_last_name: String,
-    customer_email: String
-}
-*/
 
 // Routing for ticket API
 #[post("/ticket", format = "application/json", data = "<ticket>")]
 async fn api_create_ticket(_key: ApiKey, ticket: Json<Ticket>) -> String {
-    /*
-    pub struct Ticket {
-        user_id: ObjectId,
-        title: String,
-        close_date: String,
-        customer_first_name: String,
-        customer_last_name: String,
-        customer_email: String
-    }
-    */
-    let ticket_id = db_handler::insert_ticket_doc(ObjectId::new(), ticket.title.clone(), ticket.close_date.clone(), ticket.customer_first_name.clone(), ticket.customer_last_name.clone(), ticket.customer_email.clone()).await;
-    
-    match ticket_id {
-        Ok(string_id) => format!("ticket created {string_id}"),
-        Err(e) => format!("error: {e}")
-    }
+    format!("CREATE TICKET")
 }
 
 #[put("/ticket/<ticket_id>", format = "application/json", data = "<ticket>")]
