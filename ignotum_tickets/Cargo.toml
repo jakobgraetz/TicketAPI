@@ -7,15 +7,10 @@ authors = ["Johannes Schießl","Jakob Grätz"]
 [dependencies]
 rocket_contrib = { version = "0.4.10", features = ["json"] }
 rocket = { version = "0.5.0", features = ["secrets", "json"] }
-rocket_dyn_templates = { version = "0.1.0", features = ["tera"] }
 tokio = { version = "1", features = ["full"] }
-rand = "0.8.5"
 chrono = "0.4"
-mongodb = "2.8.2"
-bson = "2.9.0"
 serde = "1.0.197"
 futures = "0.3.30"
 serde_json = "1.0.115"
-argon2 = "0.5.3"
-aes = "0.8.4"
-block-modes = "0.9.1"
+tokio-postgres = "0.7.10"
+dotenv = "0.15.0"

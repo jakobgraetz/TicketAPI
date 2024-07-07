@@ -7,6 +7,11 @@ use rocket::http::Status;
 use rocket::request::{self, Request, FromRequest};
 use rocket::request::Outcome;
 use rocket::serde::{json::Json, Serialize, Deserialize};
+use tokio_postgres::{NoTls, Error};
+use std::env;
+use dotenv::dotenv;
+use tokio_postgres::Row;
+use chrono::{DateTime, Utc, NaiveDateTime};
 
 struct ApiKey(String);
 
@@ -25,9 +30,22 @@ enum ApiKeyError {
     Invalid
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct Ticket {
+    //id: i64,
+    event_name: Option<String>,
+    event_location: Option<String>,
+    event_date: Option<String>,
+    //key_id: i64,
+    status: Option<String>,
+    holder_name: Option<String>,
+    holder_email: Option<String>,
+    notes: Option<String>,
+    terms_and_conditions: Option<String>,
+    //created_at: NaiveDateTime,
+    //updated_at: Option<NaiveDateTime>,
 }
+
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for ApiKey {
@@ -38,27 +56,100 @@ impl<'r> FromRequest<'r> for ApiKey {
 
         match keys.len() {
             0 => Outcome::Error((Status::BadRequest, ApiKeyError::Missing)),
-            1 if is_api_key_valid(keys[0]) => Outcome::Success(ApiKey(keys[0].to_string())),
+            1 if is_api_key_valid(keys[0]).await.is_ok() => Outcome::Success(ApiKey(keys[0].to_string())),
             1 => Outcome::Error((Status::BadRequest, ApiKeyError::Invalid)),
             _ => Outcome::Error((Status::BadRequest, ApiKeyError::BadCount)),
         }
     }
 }
 
-fn is_api_key_valid(key: &str) -> bool {
-    update_usage();
-    key == "valid_api_key"
+async fn is_api_key_valid(key: &str) -> Result<i64, Error> {
+    key.to_string();
+
+    dotenv().ok();
+    let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+    let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+
+    let query = format!("SELECT id FROM keys WHERE api_key = $1");
+    let row = client.query_one(&query, &[&key]).await?;
+
+    let key_id: i64 = row.get(0);
+    update_usage(key_id);
+
+    Ok(key_id)
 }
 
-fn update_usage() {
-    println!("Updating Usage for user.")
+fn update_usage(key_id: i64) {
+    println!("Updating Usage for user with key id {}.", key_id)
 }
 
+async fn insert_ticket(ticket: Json<Ticket>, key_id: i64) -> Result<i64, Error> {
+    let event_name = ticket.event_name.clone().unwrap_or_else(|| "".to_string());
+    let event_location = ticket.event_location.clone().unwrap_or_else(|| "".to_string());
+    let event_date = ticket.event_date.clone().unwrap_or_else(|| "".to_string());
+    let status = ticket.status.clone().unwrap_or_else(|| "".to_string());
+    let holder_name = ticket.holder_name.clone().unwrap_or_else(|| "".to_string());
+    let holder_email = ticket.holder_email.clone().unwrap_or_else(|| "".to_string());
+    let notes = ticket.notes.clone().unwrap_or_else(|| "".to_string());
+    let terms_and_conditions = ticket.terms_and_conditions.clone().unwrap_or_else(|| "".to_string());
+
+    dotenv().ok();
+    let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+    let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+
+    let query = format!("INSERT INTO tickets (event_name, event_location, event_date, status, holder_name, holder_email, notes, terms_and_conditions, key_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id");
+    let row = client.query_one(&query, &[&event_name, &event_location, &event_date, &status, &holder_name, &holder_email, &notes, &terms_and_conditions, &key_id]).await?;
+
+    let generated_id: i64 = row.get(0);
+
+    Ok(generated_id)
+}
 
 // Routing for ticket API
 #[post("/ticket", format = "application/json", data = "<ticket>")]
-async fn api_create_ticket(_key: ApiKey, ticket: Json<Ticket>) -> String {
-    format!("CREATE TICKET")
+async fn api_create_ticket(key: ApiKey, ticket: Json<Ticket>) -> String {
+    let key_id: i64 = is_api_key_valid(&key.0).await.unwrap();
+    let id: i64 = insert_ticket(ticket, key_id).await.unwrap();
+
+    format!("Ticket created successfully: {}", id)
+        /*
+    "id": i64 SEQUENTIAL NOT NULL,
+    "event_name": varchar,
+    "event_location": varchar,
+    "event_date": timestamptz,
+    "key_id": i64 FOREIGN KEY -> keys - NOT NULL,
+    "status": varchar,
+    "status": "Active",
+    "holder_name": varchar,
+    "holder_email": varchar,
+    "notes": varchar,
+    "terms_and_conditions": varchar,
+    "created_at": timestamp NOT NULL,
+    "updated_at": timestamp
+    -----
+    id: i64,
+    event_name: Option<String>,
+    event_location: Option<String>,
+    event_date: Option<String>,
+    key_id: i64,
+    status: Option<String>,
+    holder_name: Option<String>,
+    holder_email: Option<String>,
+    notes: Option<String>,
+    terms_and_conditions: Option<String>,
+    */
 }
 
 #[put("/ticket/<ticket_id>", format = "application/json", data = "<ticket>")]
@@ -191,6 +282,44 @@ fn catch_err_503() -> Json<ErrorResponse> {
         suggestion: "Try again later or contact support if the issue persists.",
     })
 }
+
+/* 
+async fn test_psql() -> Result<(), Error> {
+    dotenv().ok();
+    let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+    print_all_rows(database_url, "keys").await
+}
+
+async fn print_all_rows(database_url: String, table_name: &str) -> Result<(), Error> {
+    let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+
+    let query = format!("SELECT * FROM {}", table_name);
+    let rows = client.query(&query, &[]).await?;
+
+    for row in &rows {
+        for (i, column) in row.columns().iter().enumerate() {
+            let value = match column.type_().name() {
+                "int4" => row.get::<usize, i32>(i).to_string(),
+                "int8" => row.get::<usize, i64>(i).to_string(),
+                "float8" => row.get::<usize, f64>(i).to_string(),
+                "bool" => row.get::<usize, bool>(i).to_string(),
+                "text" | "varchar" => row.get::<usize, &str>(i).to_string(),
+                _ => "<UNKNOWN>".to_string(),
+            };
+            print!("{}: {}, ", column.name(), value);
+        }
+        println!();
+    }
+
+    Ok(())
+}
+*/
 
 #[tokio::main]
 async fn main() {
