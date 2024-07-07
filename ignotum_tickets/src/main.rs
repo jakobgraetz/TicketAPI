@@ -30,7 +30,6 @@ enum ApiKeyError {
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Ticket {
-    id: Option<i64>,
     event_name: Option<String>,
     event_location: Option<String>,
     event_date: Option<String>,
@@ -165,11 +164,80 @@ async fn api_create_ticket(key: ApiKey, ticket: Json<Ticket>) -> String {
     */
 }
 
+async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Result<(), Error> {
+    dotenv().ok();
+    let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+    let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+
+    let query = format!("SELECT key_id FROM tickets WHERE id = $1");
+    let row = client.query_one(&query, &[&ticket_id]).await?;
+
+    let stored_key_id: i64 = row.get(0);
+
+    if stored_key_id == key_id {
+        let event_name = ticket.event_name.clone().unwrap_or_else(|| "".to_string());
+        let event_location = ticket.event_location.clone().unwrap_or_else(|| "".to_string());
+        let event_date = ticket.event_date.clone().unwrap_or_else(|| "".to_string());
+        let status = ticket.status.clone().unwrap_or_else(|| "".to_string());
+        let holder_name = ticket.holder_name.clone().unwrap_or_else(|| "".to_string());
+        let holder_email = ticket.holder_email.clone().unwrap_or_else(|| "".to_string());
+        let notes = ticket.notes.clone().unwrap_or_else(|| "".to_string());
+        let terms_and_conditions = ticket.terms_and_conditions.clone().unwrap_or_else(|| "".to_string());
+
+        let update_date_query = format!("UPDATE tickets SET updated_at = NOW() WHERE id = $1");
+        let _ = client.query_one(&update_date_query, &[&ticket_id]).await?;
+
+        if !event_name.is_empty() {
+            let update_event_name_query = format!("UPDATE tickets SET event_name = $1 WHERE id = $2");
+            let _ = client.query_one(&update_event_name_query, &[&event_name, &ticket_id]).await?;
+        }
+        if !event_location.is_empty() {
+            let update_event_location_query = format!("UPDATE tickets SET event_location = $1 WHERE id = $2");
+            let _ = client.query_one(&update_event_location_query, &[&event_location ,&ticket_id]).await?;
+        }
+        if !event_date.is_empty() {
+            let update_event_date_query = format!("UPDATE tickets SET event_date = $1 WHERE id = $2");
+            let _ = client.query_one(&update_event_date_query, &[&event_date, &ticket_id]).await?;
+        }
+        if !status.is_empty() {
+            let update_status_query = format!("UPDATE tickets SET status = $1 WHERE id = $2");
+            let _ = client.query_one(&update_status_query, &[&status, &ticket_id]).await?;
+        }
+        if !holder_name.is_empty() {
+            let update_holder_name_query = format!("UPDATE tickets SET holder_name = $1 WHERE id = $2");
+            let _ = client.query_one(&update_holder_name_query, &[&holder_name, &ticket_id]).await?;
+        }
+        if !holder_email.is_empty() {
+            let update_holder_email_query = format!("UPDATE tickets SET holder_email = $1 WHERE id = $2");
+            let _ = client.query_one(&update_holder_email_query, &[&holder_email, &ticket_id]).await?;
+        }
+        if !notes.is_empty() {
+            let update_notes_query = format!("UPDATE tickets SET notes = $1 WHERE id = $2");
+            let _ = client.query_one(&update_notes_query, &[&notes, &ticket_id]).await?;
+        }
+        if !terms_and_conditions.is_empty() {
+            let update_terms_and_conditions_query = format!("UPDATE tickets SET terms_and_conditions = $1 WHERE id = $2");
+            let _ = client.query_one(&update_terms_and_conditions_query, &[&terms_and_conditions, &ticket_id]).await?;
+        }
+
+        Ok(())
+    } else {
+        Ok(())   
+    }
+}
+
 #[put("/ticket/<ticket_id>", format = "application/json", data = "<ticket>")]
 async fn api_update_ticket(ticket_id: i64, key: ApiKey, ticket: Json<Ticket>) -> String {
     let key_id: i64 = is_api_key_valid(&key.0).await.unwrap();
-    //let id: i64 = insert_ticket(ticket, key_id.clone()).await.unwrap();
     let _ = update_usage(key_id).await;
+
+    let _ = update_ticket(ticket_id, key_id, ticket).await;
 
     format!("UPDATE TICKET {ticket_id}")
 }
