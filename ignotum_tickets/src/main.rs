@@ -30,18 +30,15 @@ enum ApiKeyError {
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Ticket {
-    //id: i64,
+    id: Option<i64>,
     event_name: Option<String>,
     event_location: Option<String>,
     event_date: Option<String>,
-    //key_id: i64,
     status: Option<String>,
     holder_name: Option<String>,
     holder_email: Option<String>,
     notes: Option<String>,
     terms_and_conditions: Option<String>,
-    //created_at: NaiveDateTime,
-    //updated_at: Option<NaiveDateTime>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -186,13 +183,40 @@ async fn api_get_ticket(ticket_id: &str, key: ApiKey) -> String {
     format!("GET TICKET {ticket_id}")
 }
 
+async fn delete_ticket(ticket_id: i64, key_id: i64) -> Result<(), Error> {
+    dotenv().ok();
+    let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+    let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+
+    let query = format!("SELECT key_id FROM tickets WHERE id = $1");
+    let row = client.query_one(&query, &[&ticket_id]).await?;
+
+    let stored_key_id: i64 = row.get(0);
+
+    if stored_key_id == key_id {
+        let delete_query = format!("DELETE from tickets WHERE id = $1");
+        let _ = client.query_one(&delete_query, &[&ticket_id]).await?;
+        Ok(())
+    } else {
+        Ok(())   
+    }
+
+    
+}
+
 #[delete("/ticket/<ticket_id>")]
-async fn api_delete_ticket(ticket_id: &str, key: ApiKey) -> String {
+async fn api_delete_ticket(ticket_id: i64, key: ApiKey) -> String {
     let key_id: i64 = is_api_key_valid(&key.0).await.unwrap();
-    //let id: i64 = insert_ticket(ticket, key_id.clone()).await.unwrap();
     let _ = update_usage(key_id).await;
 
-    format!("DELETE TICKET {ticket_id}")
+    let _ = delete_ticket(ticket_id, key_id).await;
+    format!("Successfully deleted ticket {:?}", ticket_id)
 }
 
 // HTTP Error Handlers and Catchers
@@ -305,44 +329,6 @@ fn catch_err_503() -> Json<ErrorResponse> {
         suggestion: "Try again later or contact support if the issue persists.",
     })
 }
-
-/* 
-async fn test_psql() -> Result<(), Error> {
-    dotenv().ok();
-    let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
-    print_all_rows(database_url, "keys").await
-}
-
-async fn print_all_rows(database_url: String, table_name: &str) -> Result<(), Error> {
-    let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
-
-    tokio::spawn(async move {
-        if let Err(e) = connection.await {
-            eprintln!("connection error: {}", e);
-        }
-    });
-
-    let query = format!("SELECT * FROM {}", table_name);
-    let rows = client.query(&query, &[]).await?;
-
-    for row in &rows {
-        for (i, column) in row.columns().iter().enumerate() {
-            let value = match column.type_().name() {
-                "int4" => row.get::<usize, i32>(i).to_string(),
-                "int8" => row.get::<usize, i64>(i).to_string(),
-                "float8" => row.get::<usize, f64>(i).to_string(),
-                "bool" => row.get::<usize, bool>(i).to_string(),
-                "text" | "varchar" => row.get::<usize, &str>(i).to_string(),
-                _ => "<UNKNOWN>".to_string(),
-            };
-            print!("{}: {}, ", column.name(), value);
-        }
-        println!();
-    }
-
-    Ok(())
-}
-*/
 
 #[tokio::main]
 async fn main() {
