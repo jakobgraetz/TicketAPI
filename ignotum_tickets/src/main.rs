@@ -166,7 +166,7 @@ async fn api_create_ticket(key: ApiKey, ticket: Json<Ticket>) -> String {
 }
 
 #[put("/ticket/<ticket_id>", format = "application/json", data = "<ticket>")]
-async fn api_update_ticket(ticket_id: &str, key: ApiKey, ticket: Json<Ticket>) -> String {
+async fn api_update_ticket(ticket_id: i64, key: ApiKey, ticket: Json<Ticket>) -> String {
     let key_id: i64 = is_api_key_valid(&key.0).await.unwrap();
     //let id: i64 = insert_ticket(ticket, key_id.clone()).await.unwrap();
     let _ = update_usage(key_id).await;
@@ -175,7 +175,7 @@ async fn api_update_ticket(ticket_id: &str, key: ApiKey, ticket: Json<Ticket>) -
 }
 
 #[get("/ticket/<ticket_id>")]
-async fn api_get_ticket(ticket_id: &str, key: ApiKey) -> String {
+async fn api_get_ticket(ticket_id: i64, key: ApiKey) -> String {
     let key_id: i64 = is_api_key_valid(&key.0).await.unwrap();
     //let id: i64 = insert_ticket(ticket, key_id.clone()).await.unwrap();
     let _ = update_usage(key_id).await;
