@@ -3,6 +3,8 @@
         "bson",
         "CEST",
         "chrono",
+        "datetime",
+        "dotenv",
         "Hasher",
         "ignotum",
         "jakobgraetz",
@@ -10,6 +12,7 @@
         "mflix",
         "Rustaceans",
         "tailwindcss",
-        "tera"
+        "tera",
+        "timestamptz"
     ]
 }
