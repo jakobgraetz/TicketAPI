@@ -10,8 +10,6 @@ use rocket::serde::{json::Json, Serialize, Deserialize};
 use tokio_postgres::{NoTls, Error};
 use std::env;
 use dotenv::dotenv;
-use tokio_postgres::Row;
-use chrono::{DateTime, Utc, NaiveDateTime};
 
 struct ApiKey(String);
 
@@ -46,6 +44,11 @@ struct Ticket {
     //updated_at: Option<NaiveDateTime>,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+struct MonthlyUsage {
+    date: String,
+    usage: i64,
+}
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for ApiKey {
@@ -80,13 +83,25 @@ async fn is_api_key_valid(key: &str) -> Result<i64, Error> {
     let row = client.query_one(&query, &[&key]).await?;
 
     let key_id: i64 = row.get(0);
-    update_usage(key_id);
 
     Ok(key_id)
 }
 
-fn update_usage(key_id: i64) {
-    println!("Updating Usage for user with key id {}.", key_id)
+async fn update_usage(key_id: i64) -> Result<(), Error> {
+    dotenv().ok();
+    let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+    let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+
+    let total_query = format!("UPDATE keys SET total_uses = total_uses + 1 WHERE id = $1");
+    let _ = client.query_one(&total_query, &[&key_id]).await?;
+    
+    Ok(())
 }
 
 async fn insert_ticket(ticket: Json<Ticket>, key_id: i64) -> Result<i64, Error> {
@@ -121,7 +136,8 @@ async fn insert_ticket(ticket: Json<Ticket>, key_id: i64) -> Result<i64, Error> 
 #[post("/ticket", format = "application/json", data = "<ticket>")]
 async fn api_create_ticket(key: ApiKey, ticket: Json<Ticket>) -> String {
     let key_id: i64 = is_api_key_valid(&key.0).await.unwrap();
-    let id: i64 = insert_ticket(ticket, key_id).await.unwrap();
+    let id: i64 = insert_ticket(ticket, key_id.clone()).await.unwrap();
+    let _ = update_usage(key_id).await;
 
     format!("Ticket created successfully: {}", id)
         /*
@@ -153,23 +169,30 @@ async fn api_create_ticket(key: ApiKey, ticket: Json<Ticket>) -> String {
 }
 
 #[put("/ticket/<ticket_id>", format = "application/json", data = "<ticket>")]
-fn api_update_ticket(ticket_id: &str, _key: ApiKey, ticket: Json<Ticket>) -> String {
+async fn api_update_ticket(ticket_id: &str, key: ApiKey, ticket: Json<Ticket>) -> String {
+    let key_id: i64 = is_api_key_valid(&key.0).await.unwrap();
+    //let id: i64 = insert_ticket(ticket, key_id.clone()).await.unwrap();
+    let _ = update_usage(key_id).await;
+
     format!("UPDATE TICKET {ticket_id}")
 }
 
 #[get("/ticket/<ticket_id>")]
-fn api_get_ticket(ticket_id: &str, _key: ApiKey) -> String {
+async fn api_get_ticket(ticket_id: &str, key: ApiKey) -> String {
+    let key_id: i64 = is_api_key_valid(&key.0).await.unwrap();
+    //let id: i64 = insert_ticket(ticket, key_id.clone()).await.unwrap();
+    let _ = update_usage(key_id).await;
+
     format!("GET TICKET {ticket_id}")
 }
 
 #[delete("/ticket/<ticket_id>")]
-fn api_delete_ticket(ticket_id: &str, _key: ApiKey) -> String {
-    format!("DELETE TICKET {ticket_id}")
-}
+async fn api_delete_ticket(ticket_id: &str, key: ApiKey) -> String {
+    let key_id: i64 = is_api_key_valid(&key.0).await.unwrap();
+    //let id: i64 = insert_ticket(ticket, key_id.clone()).await.unwrap();
+    let _ = update_usage(key_id).await;
 
-#[get("/ticket/check/<ticket_id>")]
-fn api_check_ticket(ticket_id: &str, _key: ApiKey) -> String {
-    format!("CHECK TICKET {ticket_id}")
+    format!("DELETE TICKET {ticket_id}")
 }
 
 // HTTP Error Handlers and Catchers
@@ -326,7 +349,7 @@ async fn main() {
     let _ = rocket::build()
         .configure(rocket::Config::figment().merge(("port", 10000)))
         .register("/", catchers![catch_err_400, catch_err_401, catch_err_403, catch_err_404, catch_err_405, catch_err_408, catch_err_429, catch_err_500, catch_err_501, catch_err_502, catch_err_503])
-        .mount("/v1/", routes![api_create_ticket, api_get_ticket, api_delete_ticket, api_update_ticket, api_check_ticket])
+        .mount("/v1/", routes![api_create_ticket, api_get_ticket, api_delete_ticket, api_update_ticket])
         .launch()
         .await;
 }
