@@ -62,6 +62,7 @@ impl<'r> FromRequest<'r> for ApiKey {
     }
 }
 
+// Key verification.
 async fn is_api_key_valid(key: &str) -> Result<i64, Error> {
     key.to_string();
 
@@ -83,6 +84,7 @@ async fn is_api_key_valid(key: &str) -> Result<i64, Error> {
     Ok(key_id)
 }
 
+// Usage data gathering.
 async fn update_usage(key_id: i64) -> Result<(), Error> {
     dotenv().ok();
     let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
@@ -100,6 +102,7 @@ async fn update_usage(key_id: i64) -> Result<(), Error> {
     Ok(())
 }
 
+// Ticket creation.
 async fn insert_ticket(ticket: Json<Ticket>, key_id: i64) -> Result<i64, Error> {
     let event_name = ticket.event_name.clone().unwrap_or_else(|| "".to_string());
     let event_location = ticket.event_location.clone().unwrap_or_else(|| "".to_string());
@@ -164,6 +167,7 @@ async fn api_create_ticket(key: ApiKey, ticket: Json<Ticket>) -> String {
     */
 }
 
+// Ticket update.
 async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Result<(), Error> {
     dotenv().ok();
     
@@ -377,6 +381,7 @@ async fn api_update_ticket(ticket_id: i64, key: ApiKey, ticket: Json<Ticket>) ->
     format!("UPDATE TICKET {ticket_id}")
 }
 
+// TODO: TICKET VERIFICATION
 #[get("/ticket/<ticket_id>")]
 async fn api_get_ticket(ticket_id: i64, key: ApiKey) -> String {
     let key_id: i64 = is_api_key_valid(&key.0).await.unwrap();
@@ -386,6 +391,7 @@ async fn api_get_ticket(ticket_id: i64, key: ApiKey) -> String {
     format!("GET TICKET {ticket_id}")
 }
 
+// Ticket deletion.
 async fn delete_ticket(ticket_id: i64, key_id: i64) -> Result<(), Error> {
     dotenv().ok();
     let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
