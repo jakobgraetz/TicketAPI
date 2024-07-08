@@ -1,6 +1,6 @@
 // @author Jakob Grätz, Johannes Schießl
 // @date 08/07/2024 (DD/MM/YYYY)
-// @version v0.0.3
+// @version v0.5.0
 
 #[macro_use] extern crate rocket;
 use rocket::http::Status;
@@ -30,6 +30,7 @@ enum ApiKeyError {
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Ticket {
+    id: Option<i64>,
     event_name: Option<String>,
     event_location: Option<String>,
     event_date: Option<String>,
@@ -382,13 +383,72 @@ async fn api_update_ticket(ticket_id: i64, key: ApiKey, ticket: Json<Ticket>) ->
 }
 
 // TODO: TICKET VERIFICATION
+async fn get_ticket(ticket_id:i64, key_id: i64) -> Result<Json<Ticket>, Error> {
+    dotenv().ok();
+    
+    let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+    let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+
+    let query = format!("SELECT key_id FROM tickets WHERE id = $1");
+    let row = client.query_one(&query, &[&ticket_id]).await?;
+
+    let stored_id: i64 = row.get(0);
+
+    if key_id == stored_id {
+        let select_query = format!("SELECT status, event_name, event_location, event_date, holder_name, holder_email, notes, terms_and_conditions FROM tickets WHERE id = $1");
+        let row = client.query_one(&select_query, &[&ticket_id]).await?;
+
+        let status: String = row.get(0);
+        let event_name: String = row.get(1);
+        let event_location: String = row.get(2);
+        let event_date: String = row.get(3);
+        let holder_name: String = row.get(4);
+        let holder_email: String = row.get(5);
+        let notes: String = row.get(6);
+        let terms_and_conditions: String = row.get(7);
+        
+        let ticket = Ticket {
+            id: Some(ticket_id),
+            event_name: Some(event_name),
+            event_location: Some(event_location),
+            event_date: Some(event_date),
+            status: Some(status),
+            holder_name: Some(holder_name),
+            holder_email: Some(holder_email),
+            notes: Some(notes),
+            terms_and_conditions: Some(terms_and_conditions),
+        };
+    
+        Ok(Json(ticket))
+    } else {
+        let ticket = Ticket {
+            id: None,
+            event_name: None,
+            event_location: None,
+            event_date: None,
+            status: None,
+            holder_name: None,
+            holder_email: None,
+            notes: None,
+            terms_and_conditions: None,
+        };
+        Ok(Json(ticket))
+    }
+}
+
 #[get("/ticket/<ticket_id>")]
-async fn api_get_ticket(ticket_id: i64, key: ApiKey) -> String {
+async fn api_get_ticket(ticket_id: i64, key: ApiKey) -> Json<Ticket> {
     let key_id: i64 = is_api_key_valid(&key.0).await.unwrap();
-    //let id: i64 = insert_ticket(ticket, key_id.clone()).await.unwrap();
+    let returnable_ticket = get_ticket(ticket_id, key_id).await.unwrap();
     let _ = update_usage(key_id).await;
 
-    format!("GET TICKET {ticket_id}")
+    returnable_ticket
 }
 
 // Ticket deletion.
