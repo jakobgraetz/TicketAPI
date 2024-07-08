@@ -1,6 +1,6 @@
 // @author Jakob Grätz, Johannes Schießl
-// @date 05/07/2024 (DD/MM/YYYY)
-// @version v0.0.2
+// @date 08/07/2024 (DD/MM/YYYY)
+// @version v0.0.3
 
 #[macro_use] extern crate rocket;
 use rocket::http::Status;
@@ -166,6 +166,7 @@ async fn api_create_ticket(key: ApiKey, ticket: Json<Ticket>) -> String {
 
 async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Result<(), Error> {
     dotenv().ok();
+    
     let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
     let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
 
@@ -179,52 +180,186 @@ async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Res
     let row = client.query_one(&query, &[&ticket_id]).await?;
 
     let stored_key_id: i64 = row.get(0);
-
+    
     if stored_key_id == key_id {
-        let event_name = ticket.event_name.clone().unwrap_or_else(|| "".to_string());
-        let event_location = ticket.event_location.clone().unwrap_or_else(|| "".to_string());
-        let event_date = ticket.event_date.clone().unwrap_or_else(|| "".to_string());
-        let status = ticket.status.clone().unwrap_or_else(|| "".to_string());
-        let holder_name = ticket.holder_name.clone().unwrap_or_else(|| "".to_string());
-        let holder_email = ticket.holder_email.clone().unwrap_or_else(|| "".to_string());
-        let notes = ticket.notes.clone().unwrap_or_else(|| "".to_string());
-        let terms_and_conditions = ticket.terms_and_conditions.clone().unwrap_or_else(|| "".to_string());
+        async fn update_event_name(ticket: &Json<Ticket>, ticket_id: i64) -> Result<(), Error> {
+            dotenv().ok();
+
+            let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+            let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+            tokio::spawn(async move {
+                if let Err(e) = connection.await {
+                    eprintln!("connection error: {}", e);
+                }
+            });
+
+            let event_name = ticket.event_name.clone().unwrap_or_else(|| "".to_string());
+            if !event_name.is_empty() {
+                let update_event_name_query = format!("UPDATE tickets SET event_name = $1 WHERE id = $2");
+                let _ = client.query(&update_event_name_query, &[&event_name, &ticket_id]).await?;
+            }
+
+            Ok(())
+        }
+
+        async fn update_event_location(ticket: &Json<Ticket>, ticket_id: i64) -> Result <(), Error> {
+            dotenv().ok();
+
+            let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+            let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+            tokio::spawn(async move {
+                if let Err(e) = connection.await {
+                    eprintln!("connection error: {}", e);
+                }
+            });
+
+            let event_location = ticket.event_location.clone().unwrap_or_else(|| "".to_string());
+            if !event_location.is_empty() {
+                let update_event_location_query = format!("UPDATE tickets SET event_location = $1 WHERE id = $2");
+                let _ = client.query(&update_event_location_query, &[&event_location ,&ticket_id]).await?;
+            }
+
+            Ok(())
+        }
+
+        async fn update_event_date(ticket: &Json<Ticket>, ticket_id: i64) -> Result<(), Error> {
+            dotenv().ok();
+
+            let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+            let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+            tokio::spawn(async move {
+                if let Err(e) = connection.await {
+                    eprintln!("connection error: {}", e);
+                }
+            });
+
+            let event_date = ticket.event_date.clone().unwrap_or_else(|| "".to_string());
+            if !event_date.is_empty() {
+                let update_event_date_query = format!("UPDATE tickets SET event_date = $1 WHERE id = $2");
+                let _ = client.query(&update_event_date_query, &[&event_date, &ticket_id]).await?;
+            }
+
+            Ok(())
+        }
+
+        async fn update_status(ticket: &Json<Ticket>, ticket_id: i64) -> Result<(), Error> {
+            dotenv().ok();
+
+            let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+            let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+            tokio::spawn(async move {
+                if let Err(e) = connection.await {
+                    eprintln!("connection error: {}", e);
+                }
+            });
+
+            let status = ticket.status.clone().unwrap_or_else(|| "".to_string());
+            if !status.is_empty() {
+                let update_status_query = format!("UPDATE tickets SET status = $1 WHERE id = $2");
+                let _ = client.query(&update_status_query, &[&status, &ticket_id]).await?;
+            }
+
+            Ok(())
+        }
+
+        async fn update_holder_name(ticket: &Json<Ticket>, ticket_id: i64) -> Result<(), Error> {
+            dotenv().ok();
+
+            let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+            let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+            tokio::spawn(async move {
+                if let Err(e) = connection.await {
+                    eprintln!("connection error: {}", e);
+                }
+            });
+
+            let holder_name = ticket.holder_name.clone().unwrap_or_else(|| "".to_string());
+            if !holder_name.is_empty() {
+                let update_holder_name_query = format!("UPDATE tickets SET holder_name = $1 WHERE id = $2");
+                let _ = client.query(&update_holder_name_query, &[&holder_name, &ticket_id]).await?;
+            }
+
+            Ok(())
+        }
+
+        async fn update_holder_email(ticket: &Json<Ticket>, ticket_id: i64) -> Result<(), Error> {
+            dotenv().ok();
+
+            let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+            let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+            tokio::spawn(async move {
+                if let Err(e) = connection.await {
+                    eprintln!("connection error: {}", e);
+                }
+            });
+
+            let holder_email = ticket.holder_email.clone().unwrap_or_else(|| "".to_string());
+            if !holder_email.is_empty() {
+                let update_holder_email_query = format!("UPDATE tickets SET holder_email = $1 WHERE id = $2");
+                let _ = client.query(&update_holder_email_query, &[&holder_email, &ticket_id]).await?;
+            }
+
+            Ok(())
+        }
+
+        async fn update_notes(ticket: &Json<Ticket>, ticket_id: i64) -> Result<(), Error> {
+            dotenv().ok();
+
+            let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+            let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+            tokio::spawn(async move {
+                if let Err(e) = connection.await {
+                    eprintln!("connection error: {}", e);
+                }
+            });
+
+            let notes = ticket.notes.clone().unwrap_or_else(|| "".to_string());
+            if !notes.is_empty() {
+                let update_notes_query = format!("UPDATE tickets SET notes = $1 WHERE id = $2");
+                let _ = client.query(&update_notes_query, &[&notes, &ticket_id]).await?;
+            }
+
+            Ok(())
+        }
+
+        async fn update_terms_and_conditions(ticket: &Json<Ticket>, ticket_id: i64) -> Result<(), Error> {
+            dotenv().ok();
+
+            let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
+            let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
+
+            tokio::spawn(async move {
+                if let Err(e) = connection.await {
+                    eprintln!("connection error: {}", e);
+                }
+            });
+
+            let terms_and_conditions = ticket.terms_and_conditions.clone().unwrap_or_else(|| "".to_string());
+            if !terms_and_conditions.is_empty() {
+                let update_terms_and_conditions_query = format!("UPDATE tickets SET terms_and_conditions = $1 WHERE id = $2");
+                let _ = client.query(&update_terms_and_conditions_query, &[&terms_and_conditions, &ticket_id]).await?;
+            }
+
+            Ok(())
+        }
 
         let update_date_query = format!("UPDATE tickets SET updated_at = NOW() WHERE id = $1");
-        let _ = client.query_one(&update_date_query, &[&ticket_id]).await?;
-
-        if !event_name.is_empty() {
-            let update_event_name_query = format!("UPDATE tickets SET event_name = $1 WHERE id = $2");
-            let _ = client.query_one(&update_event_name_query, &[&event_name, &ticket_id]).await?;
-        }
-        if !event_location.is_empty() {
-            let update_event_location_query = format!("UPDATE tickets SET event_location = $1 WHERE id = $2");
-            let _ = client.query_one(&update_event_location_query, &[&event_location ,&ticket_id]).await?;
-        }
-        if !event_date.is_empty() {
-            let update_event_date_query = format!("UPDATE tickets SET event_date = $1 WHERE id = $2");
-            let _ = client.query_one(&update_event_date_query, &[&event_date, &ticket_id]).await?;
-        }
-        if !status.is_empty() {
-            let update_status_query = format!("UPDATE tickets SET status = $1 WHERE id = $2");
-            let _ = client.query_one(&update_status_query, &[&status, &ticket_id]).await?;
-        }
-        if !holder_name.is_empty() {
-            let update_holder_name_query = format!("UPDATE tickets SET holder_name = $1 WHERE id = $2");
-            let _ = client.query_one(&update_holder_name_query, &[&holder_name, &ticket_id]).await?;
-        }
-        if !holder_email.is_empty() {
-            let update_holder_email_query = format!("UPDATE tickets SET holder_email = $1 WHERE id = $2");
-            let _ = client.query_one(&update_holder_email_query, &[&holder_email, &ticket_id]).await?;
-        }
-        if !notes.is_empty() {
-            let update_notes_query = format!("UPDATE tickets SET notes = $1 WHERE id = $2");
-            let _ = client.query_one(&update_notes_query, &[&notes, &ticket_id]).await?;
-        }
-        if !terms_and_conditions.is_empty() {
-            let update_terms_and_conditions_query = format!("UPDATE tickets SET terms_and_conditions = $1 WHERE id = $2");
-            let _ = client.query_one(&update_terms_and_conditions_query, &[&terms_and_conditions, &ticket_id]).await?;
-        }
+        let _ = client.query(&update_date_query, &[&ticket_id]).await?;
+        let _ = update_event_name(&ticket, ticket_id).await?;
+        let _ = update_event_location(&ticket, ticket_id).await?;
+        let _ = update_event_date(&ticket, ticket_id).await?;
+        let _ = update_status(&ticket, ticket_id).await?;
+        let _ = update_holder_name(&ticket, ticket_id).await?;
+        let _ = update_holder_email(&ticket, ticket_id).await?;
+        let _ = update_notes(&ticket, ticket_id).await?;
+        let _ = update_terms_and_conditions(&ticket, ticket_id).await?;
 
         Ok(())
     } else {
@@ -237,7 +372,7 @@ async fn api_update_ticket(ticket_id: i64, key: ApiKey, ticket: Json<Ticket>) ->
     let key_id: i64 = is_api_key_valid(&key.0).await.unwrap();
     let _ = update_usage(key_id).await;
 
-    let _ = update_ticket(ticket_id, key_id, ticket).await;
+    let _ = update_ticket(ticket_id, key_id, ticket).await.unwrap();
 
     format!("UPDATE TICKET {ticket_id}")
 }
