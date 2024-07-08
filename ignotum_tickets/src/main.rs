@@ -606,10 +606,11 @@ async fn main() {
 
     let _ = rocket::build()
         .configure(rocket::Config::figment()
-            .merge(("port", 10000))
+            .merge(("port", 8000))
+            .merge(("address", "0.0.0.0"))
             .merge(("secret_key", secret_key)))
         .register("/", catchers![catch_err_400, catch_err_401, catch_err_403, catch_err_404, catch_err_405, catch_err_408, catch_err_429, catch_err_500, catch_err_501, catch_err_502, catch_err_503])
-        .mount("/beta/", routes![api_create_ticket, api_get_ticket, api_delete_ticket, api_update_ticket])
+        .mount("/v1/", routes![api_create_ticket, api_get_ticket, api_delete_ticket, api_update_ticket])
         .launch()
         .await;
 }
