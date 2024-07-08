@@ -1,6 +1,6 @@
 // @author Jakob Grätz, Johannes Schießl
 // @date 08/07/2024 (DD/MM/YYYY)
-// @version v0.5.0
+// @version v0.6.0
 
 #[macro_use] extern crate rocket;
 use rocket::http::Status;
