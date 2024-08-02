@@ -601,7 +601,7 @@ fn catch_err_503() -> Json<ErrorResponse> {
 
 #[get("/")]
 fn default_response() -> String {
-    format!("Welcome to Ignotum Ticket API. Documentation is available under https://ignotum.mintlify.app!")
+    format!("Welcome to Ignotum TicketAPI. Documentation is available under: https://docs.ignotum.dev")
 }
 #[tokio::main]
 async fn main() {
