@@ -41,12 +41,6 @@ struct Ticket {
     terms_and_conditions: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-struct MonthlyUsage {
-    date: String,
-    usage: i64,
-}
-
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for ApiKey {
     type Error = ApiKeyError;
@@ -488,6 +482,11 @@ async fn api_delete_ticket(ticket_id: i64, key: ApiKey) -> String {
     format!("Successfully deleted ticket {:?}", ticket_id)
 }
 
+#[get("/")]
+fn default_response() -> String {
+    "Welcome to Ignotum TicketAPI. Documentation is available under: https://docs.ignotum.dev".to_string()
+}
+
 // HTTP Error Handlers and Catchers
 #[catch(400)]
 fn catch_err_400() -> Json<ErrorResponse> {
@@ -599,10 +598,6 @@ fn catch_err_503() -> Json<ErrorResponse> {
     })
 }
 
-#[get("/")]
-fn default_response() -> String {
-    format!("Welcome to Ignotum TicketAPI. Documentation is available under: https://docs.ignotum.dev")
-}
 #[tokio::main]
 async fn main() {
     dotenv().ok();
