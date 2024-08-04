@@ -1,5 +1,5 @@
 // @author Jakob Grätz, Johannes Schießl
-// @date 08/07/2024 (DD/MM/YYYY)
+// @date 04/08/2024 (DD/MM/YYYY)
 // @version v0.6.0
 
 #[macro_use] extern crate rocket;
