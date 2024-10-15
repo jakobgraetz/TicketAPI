@@ -1,13 +1,14 @@
 // @author Jakob Grätz, Johannes Schießl
 // @date 04/08/2024 (DD/MM/YYYY)
-// @version v0.6.0
+// @version v0.1.6
 
-#[macro_use] extern crate rocket;
+#[macro_use]
+extern crate rocket;
 use rocket::http::Status;
-use rocket::request::{self, Request, FromRequest};
+use rocket::request::{ self, Request, FromRequest };
 use rocket::request::Outcome;
-use rocket::serde::{json::Json, Serialize, Deserialize};
-use tokio_postgres::{NoTls, Error};
+use rocket::serde::{ json::Json, Serialize, Deserialize };
+use tokio_postgres::{ NoTls, Error };
 use std::env;
 use dotenv::dotenv;
 
@@ -51,10 +52,11 @@ impl<'r> FromRequest<'r> for ApiKey {
 
         match keys.len() {
             0 => Outcome::Error((Status::BadRequest, ApiKeyError::Missing)),
-            1 => match is_api_key_valid(keys[0]).await {
-                Ok(_) => Outcome::Success(ApiKey(keys[0].to_string())),
-                Err(_) => Outcome::Error((Status::BadRequest, ApiKeyError::Invalid)),
-            },
+            1 =>
+                match is_api_key_valid(keys[0]).await {
+                    Ok(_) => Outcome::Success(ApiKey(keys[0].to_string())),
+                    Err(_) => Outcome::Error((Status::BadRequest, ApiKeyError::Invalid)),
+                }
             _ => Outcome::Error((Status::BadRequest, ApiKeyError::BadCount)),
         }
     }
@@ -63,8 +65,8 @@ impl<'r> FromRequest<'r> for ApiKey {
 // Key verification.
 async fn is_api_key_valid(key: &str) -> Result<i64, ApiKeyError> {
     let database_url = env::var("SUPABASE_URI").map_err(|_| ApiKeyError::DatabaseError)?;
-    let (client, connection) = tokio_postgres::connect(&database_url, NoTls)
-        .await
+    let (client, connection) = tokio_postgres
+        ::connect(&database_url, NoTls).await
         .map_err(|_| ApiKeyError::DatabaseError)?;
 
     tokio::spawn(async move {
@@ -74,8 +76,7 @@ async fn is_api_key_valid(key: &str) -> Result<i64, ApiKeyError> {
     });
 
     let row = client
-        .query_one("SELECT id FROM keys WHERE api_key = $1", &[&key])
-        .await
+        .query_one("SELECT id FROM keys WHERE api_key = $1", &[&key]).await
         .map_err(|_| ApiKeyError::Invalid)?;
 
     let key_id: i64 = row.get(0);
@@ -95,7 +96,7 @@ async fn update_usage(key_id: i64) -> Result<(), Error> {
 
     let total_query = "UPDATE keys SET total_uses = total_uses + 1 WHERE id = $1".to_string();
     let _ = client.query_one(&total_query, &[&key_id]).await?;
-    
+
     Ok(())
 }
 
@@ -108,7 +109,9 @@ async fn insert_ticket(ticket: Json<Ticket>, key_id: i64) -> Result<i64, Error> 
     let holder_name = ticket.holder_name.clone().unwrap_or_else(|| "".to_string());
     let holder_email = ticket.holder_email.clone().unwrap_or_else(|| "".to_string());
     let notes = ticket.notes.clone().unwrap_or_else(|| "".to_string());
-    let terms_and_conditions = ticket.terms_and_conditions.clone().unwrap_or_else(|| "".to_string());
+    let terms_and_conditions = ticket.terms_and_conditions
+        .clone()
+        .unwrap_or_else(|| "".to_string());
 
     let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
     let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
@@ -119,8 +122,22 @@ async fn insert_ticket(ticket: Json<Ticket>, key_id: i64) -> Result<i64, Error> 
         }
     });
 
-    let query = "INSERT INTO tickets (event_name, event_location, event_date, status, holder_name, holder_email, notes, terms_and_conditions, key_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id".to_string();
-    let row = client.query_one(&query, &[&event_name, &event_location, &event_date, &status, &holder_name, &holder_email, &notes, &terms_and_conditions, &key_id]).await?;
+    let query =
+        "INSERT INTO tickets (event_name, event_location, event_date, status, holder_name, holder_email, notes, terms_and_conditions, key_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id".to_string();
+    let row = client.query_one(
+        &query,
+        &[
+            &event_name,
+            &event_location,
+            &event_date,
+            &status,
+            &holder_name,
+            &holder_email,
+            &notes,
+            &terms_and_conditions,
+            &key_id,
+        ]
+    ).await?;
 
     let generated_id: i64 = row.get(0);
 
@@ -135,7 +152,7 @@ async fn api_create_ticket(key: ApiKey, ticket: Json<Ticket>) -> String {
     let _ = update_usage(key_id).await;
 
     format!("Ticket created successfully: {}", id)
-        /*
+    /*
     "id": i64 SEQUENTIAL NOT NULL,
     "event_name": varchar,
     "event_location": varchar,
@@ -166,7 +183,7 @@ async fn api_create_ticket(key: ApiKey, ticket: Json<Ticket>) -> String {
 // Ticket update.
 async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Result<(), Error> {
     let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
-    
+
     let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
 
     tokio::spawn(async move {
@@ -179,7 +196,7 @@ async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Res
     let row = client.query_one(&query, &[&ticket_id]).await?;
 
     let stored_key_id: i64 = row.get(0);
-    
+
     if stored_key_id == key_id {
         async fn update_event_name(ticket: &Json<Ticket>, ticket_id: i64) -> Result<(), Error> {
             let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
@@ -193,14 +210,15 @@ async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Res
 
             let event_name = ticket.event_name.clone().unwrap_or_else(|| "".to_string());
             if !event_name.is_empty() {
-                let update_event_name_query = "UPDATE tickets SET event_name = $1 WHERE id = $2".to_string();
+                let update_event_name_query =
+                    "UPDATE tickets SET event_name = $1 WHERE id = $2".to_string();
                 let _ = client.query(&update_event_name_query, &[&event_name, &ticket_id]).await?;
             }
 
             Ok(())
         }
 
-        async fn update_event_location(ticket: &Json<Ticket>, ticket_id: i64) -> Result <(), Error> {
+        async fn update_event_location(ticket: &Json<Ticket>, ticket_id: i64) -> Result<(), Error> {
             let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
             let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
 
@@ -212,8 +230,12 @@ async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Res
 
             let event_location = ticket.event_location.clone().unwrap_or_else(|| "".to_string());
             if !event_location.is_empty() {
-                let update_event_location_query = "UPDATE tickets SET event_location = $1 WHERE id = $2".to_string();
-                let _ = client.query(&update_event_location_query, &[&event_location ,&ticket_id]).await?;
+                let update_event_location_query =
+                    "UPDATE tickets SET event_location = $1 WHERE id = $2".to_string();
+                let _ = client.query(
+                    &update_event_location_query,
+                    &[&event_location, &ticket_id]
+                ).await?;
             }
 
             Ok(())
@@ -231,7 +253,8 @@ async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Res
 
             let event_date = ticket.event_date.clone().unwrap_or_else(|| "".to_string());
             if !event_date.is_empty() {
-                let update_event_date_query = "UPDATE tickets SET event_date = $1 WHERE id = $2".to_string();
+                let update_event_date_query =
+                    "UPDATE tickets SET event_date = $1 WHERE id = $2".to_string();
                 let _ = client.query(&update_event_date_query, &[&event_date, &ticket_id]).await?;
             }
 
@@ -250,7 +273,8 @@ async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Res
 
             let status = ticket.status.clone().unwrap_or_else(|| "".to_string());
             if !status.is_empty() {
-                let update_status_query = "UPDATE tickets SET status = $1 WHERE id = $2".to_string();
+                let update_status_query =
+                    "UPDATE tickets SET status = $1 WHERE id = $2".to_string();
                 let _ = client.query(&update_status_query, &[&status, &ticket_id]).await?;
             }
 
@@ -269,7 +293,8 @@ async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Res
 
             let holder_name = ticket.holder_name.clone().unwrap_or_else(|| "".to_string());
             if !holder_name.is_empty() {
-                let update_holder_name_query = "UPDATE tickets SET holder_name = $1 WHERE id = $2".to_string();
+                let update_holder_name_query =
+                    "UPDATE tickets SET holder_name = $1 WHERE id = $2".to_string();
                 let _ = client.query(&update_holder_name_query, &[&holder_name, &ticket_id]).await?;
             }
 
@@ -288,8 +313,12 @@ async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Res
 
             let holder_email = ticket.holder_email.clone().unwrap_or_else(|| "".to_string());
             if !holder_email.is_empty() {
-                let update_holder_email_query = "UPDATE tickets SET holder_email = $1 WHERE id = $2".to_string();
-                let _ = client.query(&update_holder_email_query, &[&holder_email, &ticket_id]).await?;
+                let update_holder_email_query =
+                    "UPDATE tickets SET holder_email = $1 WHERE id = $2".to_string();
+                let _ = client.query(
+                    &update_holder_email_query,
+                    &[&holder_email, &ticket_id]
+                ).await?;
             }
 
             Ok(())
@@ -314,7 +343,10 @@ async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Res
             Ok(())
         }
 
-        async fn update_terms_and_conditions(ticket: &Json<Ticket>, ticket_id: i64) -> Result<(), Error> {
+        async fn update_terms_and_conditions(
+            ticket: &Json<Ticket>,
+            ticket_id: i64
+        ) -> Result<(), Error> {
             let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
             let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
 
@@ -324,10 +356,16 @@ async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Res
                 }
             });
 
-            let terms_and_conditions = ticket.terms_and_conditions.clone().unwrap_or_else(|| "".to_string());
+            let terms_and_conditions = ticket.terms_and_conditions
+                .clone()
+                .unwrap_or_else(|| "".to_string());
             if !terms_and_conditions.is_empty() {
-                let update_terms_and_conditions_query = "UPDATE tickets SET terms_and_conditions = $1 WHERE id = $2".to_string();
-                let _ = client.query(&update_terms_and_conditions_query, &[&terms_and_conditions, &ticket_id]).await?;
+                let update_terms_and_conditions_query =
+                    "UPDATE tickets SET terms_and_conditions = $1 WHERE id = $2".to_string();
+                let _ = client.query(
+                    &update_terms_and_conditions_query,
+                    &[&terms_and_conditions, &ticket_id]
+                ).await?;
             }
 
             Ok(())
@@ -346,7 +384,7 @@ async fn update_ticket(ticket_id: i64, key_id: i64, ticket: Json<Ticket>) -> Res
 
         Ok(())
     } else {
-        Ok(())   
+        Ok(())
     }
 }
 
@@ -361,7 +399,7 @@ async fn api_update_ticket(ticket_id: i64, key: ApiKey, ticket: Json<Ticket>) ->
 }
 
 // TODO: TICKET VERIFICATION
-async fn get_ticket(ticket_id:i64, key_id: i64) -> Result<Json<Ticket>, Error> {
+async fn get_ticket(ticket_id: i64, key_id: i64) -> Result<Json<Ticket>, Error> {
     let database_url = env::var("SUPABASE_URI").expect("SUPABASE_URI must be set");
     let (client, connection) = tokio_postgres::connect(&database_url, NoTls).await?;
 
@@ -377,7 +415,8 @@ async fn get_ticket(ticket_id:i64, key_id: i64) -> Result<Json<Ticket>, Error> {
     let stored_id: i64 = row.get(0);
 
     if key_id == stored_id {
-        let select_query = "SELECT status, event_name, event_location, event_date, holder_name, holder_email, notes, terms_and_conditions FROM tickets WHERE id = $1".to_string();
+        let select_query =
+            "SELECT status, event_name, event_location, event_date, holder_name, holder_email, notes, terms_and_conditions FROM tickets WHERE id = $1".to_string();
         let row = client.query_one(&select_query, &[&ticket_id]).await?;
 
         let status: String = row.get(0);
@@ -388,7 +427,7 @@ async fn get_ticket(ticket_id:i64, key_id: i64) -> Result<Json<Ticket>, Error> {
         let holder_email: String = row.get(5);
         let notes: String = row.get(6);
         let terms_and_conditions: String = row.get(7);
-        
+
         let ticket = Ticket {
             id: Some(ticket_id),
             event_name: Some(event_name),
@@ -400,7 +439,7 @@ async fn get_ticket(ticket_id:i64, key_id: i64) -> Result<Json<Ticket>, Error> {
             notes: Some(notes),
             terms_and_conditions: Some(terms_and_conditions),
         };
-    
+
         Ok(Json(ticket))
     } else {
         let ticket = Ticket {
@@ -448,10 +487,8 @@ async fn delete_ticket(ticket_id: i64, key_id: i64) -> Result<(), Error> {
         let _ = client.query_one(&delete_query, &[&ticket_id]).await?;
         Ok(())
     } else {
-        Ok(())   
+        Ok(())
     }
-
-    
 }
 
 #[delete("/ticket/<ticket_id>")]
@@ -584,14 +621,35 @@ async fn main() {
     dotenv().ok();
     let secret_key = env::var("ROCKET_SECRET_KEY").expect("ROCKET_SECRET_KEY must be set");
 
-    let _ = rocket::build()
-        .configure(rocket::Config::figment()
-            .merge(("port", 8000))
-            .merge(("address", "0.0.0.0"))
-            .merge(("secret_key", secret_key)))
-        .register("/", catchers![catch_err_400, catch_err_401, catch_err_403, catch_err_404, catch_err_405, catch_err_408, catch_err_429, catch_err_500, catch_err_501, catch_err_502, catch_err_503])
-        .mount("/beta/1/", routes![api_create_ticket, api_get_ticket, api_delete_ticket, api_update_ticket])
+    let _ = rocket
+        ::build()
+        .configure(
+            rocket::Config
+                ::figment()
+                .merge(("port", 8000))
+                .merge(("address", "0.0.0.0"))
+                .merge(("secret_key", secret_key))
+        )
+        .register(
+            "/",
+            catchers![
+                catch_err_400,
+                catch_err_401,
+                catch_err_403,
+                catch_err_404,
+                catch_err_405,
+                catch_err_408,
+                catch_err_429,
+                catch_err_500,
+                catch_err_501,
+                catch_err_502,
+                catch_err_503
+            ]
+        )
+        .mount(
+            "/beta/1/",
+            routes![api_create_ticket, api_get_ticket, api_delete_ticket, api_update_ticket]
+        )
         .mount("/", routes![default_response])
-        .launch()
-        .await;
+        .launch().await;
 }
