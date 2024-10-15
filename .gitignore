@@ -3,3 +3,5 @@ target/
 *.old
 *.temp
 *.env
+.DS_Store
+**/.DS_Store
