@@ -2,6 +2,9 @@
 // @date 04/08/2024 (DD/MM/YYYY)
 // @version v0.1.6
 
+//! This is the main file for the Ignotum API Beta 1.
+//! This code is considered legacy and will be removed in the future.
+
 #[macro_use]
 extern crate rocket;
 use rocket::http::Status;
