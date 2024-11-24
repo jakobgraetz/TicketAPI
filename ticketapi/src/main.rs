@@ -2,9 +2,6 @@
 // @date 04/08/2024 (DD/MM/YYYY)
 // @version v0.1.6
 
-//! This is the main file for the Ignotum API Beta 1.
-//! This code is considered legacy and will be removed in the future.
-
 #[macro_use]
 extern crate rocket;
 use rocket::http::Status;
@@ -505,7 +502,7 @@ async fn api_delete_ticket(ticket_id: i64, key: ApiKey) -> String {
 
 #[get("/")]
 fn default_response() -> String {
-    "Welcome to Ignotum TicketAPI. Documentation is available under: https://docs.ignotum.dev".to_string()
+    "Welcome to TicketAPI.".to_string()
 }
 
 // HTTP Error Handlers and Catchers

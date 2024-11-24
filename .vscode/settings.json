@@ -6,7 +6,6 @@
         "datetime",
         "dotenv",
         "Hasher",
-        "ignotum",
         "jakobgraetz",
         "johannesschiessl",
         "mflix",
