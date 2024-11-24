@@ -1,0 +1,237 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TicketAPI",
+    "version": "v0.6.0",
+    "description": "API for managing event tickets"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000/",
+      "description": "TicketAPI Server"
+    }
+  ],
+  "paths": {
+    "/ticket": {
+      "post": {
+        "summary": "Create a new ticket",
+        "operationId": "api_create_ticket",
+        "tags": ["Ticket"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ticket"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ticket created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Ticket created successfully: 1"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/ticket/{ticket_id}": {
+      "put": {
+        "summary": "Update a ticket",
+        "operationId": "api_update_ticket",
+        "tags": ["Ticket"],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the ticket to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ticket"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ticket updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "UPDATE TICKET 1"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "Get a ticket",
+        "operationId": "api_get_ticket",
+        "tags": ["Ticket"],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the ticket to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ticket retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ticket"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete a ticket",
+        "operationId": "api_delete_ticket",
+        "tags": ["Ticket"],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the ticket to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ticket deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Successfully deleted ticket 1"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Ticket": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "event_name": {
+            "type": "string",
+            "example": "Concert"
+          },
+          "event_location": {
+            "type": "string",
+            "example": "Stadium"
+          },
+          "event_date": {
+            "type": "string",
+            "example": "2024-07-08T19:00:00Z"
+          },
+          "status": {
+            "type": "string",
+            "example": "Active"
+          },
+          "holder_name": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "holder_email": {
+            "type": "string",
+            "example": "johndoe@example.com"
+          },
+          "notes": {
+            "type": "string",
+            "example": "VIP access"
+          },
+          "terms_and_conditions": {
+            "type": "string",
+            "example": "No refunds"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "example": "Bad Request"
+          },
+          "message": {
+            "type": "string",
+            "example": "The server could not understand the request due to invalid syntax."
+          },
+          "suggestion": {
+            "type": "string",
+            "example": "Check the request syntax and try again."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "x-api-key",
+        "in": "header"
+      }
+    }
+  }
+}
